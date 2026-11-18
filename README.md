@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # PriceTech + щодобове оновлення цін
 
 Запуск: `python3 server.py`, потім відкрийте http://localhost:8000
@@ -44,3 +45,7 @@
 - `index.html` — головна (лендинг). Їй потрібні **ваші** `style.css`, `app.js` та `assets/logo.png` (+ картинка hero з CSS) — покладіть їх поруч.
 - `search.html` + `search.css` + `search.js` — каталог товарів (кнопка «Почати зараз» веде сюди). Логотип у меню повертає на головну.
 - З `assets/` сервер віддає лише картинки.
+=======
+# pricetech
+PriceTech
+>>>>>>> 709cd4875031212c04f42b7e2a8c3e59cc6b7206
