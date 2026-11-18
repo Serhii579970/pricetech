@@ -480,10 +480,14 @@ def scheduler():
         time.sleep(UPDATE_HOURS * 3600)
 
 
-STATIC = {"/": "index.html", "/index.html": "index.html",
+STATIC ={"/": "index.html", "/index.html": "index.html",
           "/search.html": "search.html", "/search": "search.html",
           "/search.css": "search.css", "/search.js": "search.js",
           "/style.css": "style.css", "/app.js": "app.js"}
+for _p in ("map", "shopping-list", "calories", "notifications", "analytics"):
+    STATIC["/%s.html" % _p] = "%s.html" % _p
+    STATIC["/%s.css" % _p] = "%s.css" % _p
+    STATIC["/%s.js" % _p] = "%s.js" % _p
 TYPES = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
          ".js": "text/javascript; charset=utf-8",
          ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp",
