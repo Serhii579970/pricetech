@@ -1,0 +1,367 @@
+/* PriceTech — сторінка сповіщень */
+
+/* 1. Базові налаштування: кольори та розміри всього сайту */
+:root {
+    --bg: #050d1c;
+    --panel: #0b192d;
+    --panel-light: #102139;
+    --green: #19e99b;
+    --green-dark: #08c987;
+    --white: #fff;
+    --muted: #91a2b9;
+    --border: rgba(255,255,255,.09);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--white);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+button, input { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+.app-layout {
+    display: grid;
+    grid-template-columns: 225px minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+/* 2. Бічне меню — така сама структура, як на пошуку та карті */
+.sidebar {
+    min-height: 100vh;
+    padding: 22px 15px;
+    display: flex;
+    flex-direction: column;
+    background: #081426;
+    border-right: 1px solid var(--border);
+}
+
+.sidebar-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 35px;
+}
+.sidebar-logo img { width: 150px; height: 65px; object-fit: contain; }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 9px; }
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border-radius: 10px;
+    color: #b4c1d2;
+    font-size: 14px;
+    transition: .2s;
+}
+.sidebar-link span { width: 23px; text-align: center; font-size: 19px; }
+.sidebar-link:hover { color: var(--green); background: rgba(25,233,155,.08); }
+.sidebar-link.active { color: #06150f; background: var(--green); font-weight: 700; }
+
+.sidebar-bottom {
+    margin-top: auto;
+    padding: 20px 5px 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.8;
+}
+
+/* 3. Основна частина та верхня панель */
+.main-content { min-width: 0; padding: 20px 28px 30px; }
+
+.topbar {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    min-height: 46px;
+    margin-bottom: 25px;
+}
+.mini-brand { display: flex; align-items: center; gap: 7px; font-size: 14px; }
+.mini-brand img { width: 34px; height: 34px; object-fit: contain; }
+.topbar-spacer { flex: 1; }
+.top-icon {
+    position: relative;
+    font-size: 23px;
+    color: var(--white);
+}
+.top-icon i {
+    position: absolute; top: 1px; right: -2px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); border: 1px solid var(--bg);
+}
+.avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: grid; place-items: center;
+    color: #052016; font-weight: 800;
+    background: linear-gradient(135deg, #20efa1, #087a9c);
+}
+
+/* 4. Заголовок сторінки */
+.page-heading {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 18px; margin-bottom: 22px;
+}
+.eyebrow, .section-kicker {
+    color: var(--green); font-size: 10px; letter-spacing: 1.7px; font-weight: 700;
+}
+.page-heading h1 { margin: 7px 0; font-size: clamp(23px, 2.4vw, 32px); }
+.page-heading p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+.heading-status {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 13px; border: 1px solid rgba(25,233,155,.2);
+    border-radius: 20px; color: var(--green); font-size: 11px;
+    background: rgba(25,233,155,.06); white-space: nowrap;
+}
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 9px var(--green); }
+
+/* 5. Велика картка сповіщень */
+.notifications-panel, .watched-products {
+    background: linear-gradient(145deg, #0b1a2e, #081528);
+    border: 1px solid var(--border);
+    border-radius: 17px;
+    overflow: hidden;
+}
+.notifications-panel { padding: 22px 25px 18px; }
+
+.panel-heading {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 17px;
+}
+.panel-heading h2 { font-size: 17px; margin-bottom: 5px; }
+.panel-heading p { color: var(--muted); font-size: 11px; }
+.bell-large {
+    width: 40px; height: 40px; display: grid; place-items: center;
+    border-radius: 13px; background: rgba(25,233,155,.1);
+    color: var(--green); font-size: 22px;
+}
+
+/* 6. Вкладки. Клас .active показує, яка вкладка зараз вибрана */
+.tabs {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 9px;
+    padding: 5px; border-radius: 12px; background: #071326;
+    border: 1px solid var(--border);
+}
+.tab-button {
+    padding: 12px 15px; border: 1px solid transparent; border-radius: 9px;
+    color: var(--muted); background: transparent; font-size: 12px;
+    transition: .2s;
+}
+.tab-button:hover { color: var(--white); }
+.tab-button.active {
+    color: var(--green); background: rgba(25,233,155,.11);
+    border-color: rgba(25,233,155,.22); font-weight: 700;
+}
+.tab-panel {
+    min-height: 315px; display: grid;
+    grid-template-columns: minmax(250px, .95fr) minmax(250px, 1.05fr);
+    align-items: center; gap: 25px; padding: 25px 12px 5px;
+}
+.tab-panel[hidden] { display: none; }
+
+.notification-copy h3, .settings-intro h3 { margin: 10px 0 18px; font-size: 16px; }
+.alert-list { list-style: none; display: grid; gap: 15px; }
+.alert-list li { display: flex; align-items: center; gap: 11px; color: #d7e0ed; font-size: 12px; line-height: 1.4; }
+.check-icon {
+    flex: 0 0 20px; width: 20px; height: 20px; display: grid; place-items: center;
+    border-radius: 7px; background: var(--green); color: #052016;
+    font-size: 13px; font-weight: 900;
+}
+.watched-summary {
+    display: flex; align-items: center; gap: 10px;
+    margin: 22px 0 15px; padding: 11px;
+    background: rgba(255,255,255,.035); border: 1px solid var(--border);
+    border-radius: 10px;
+}
+.summary-icon {
+    width: 32px; height: 32px; display: grid; place-items: center;
+    border-radius: 9px; background: rgba(25,233,155,.12); color: var(--green);
+}
+.watched-summary strong, .watched-summary small { display: block; }
+.watched-summary strong { font-size: 11px; }
+.watched-summary small { margin-top: 4px; color: var(--muted); font-size: 10px; }
+
+.primary-button {
+    display: inline-flex; align-items: center; justify-content: center; gap: 18px;
+    padding: 12px 22px; border: 0; border-radius: 24px;
+    color: #04150f; background: linear-gradient(135deg, #20efa1, #08c88a);
+    font-size: 12px; font-weight: 800;
+    box-shadow: 0 5px 20px rgba(25,233,155,.17); transition: .2s;
+}
+.primary-button:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+/* 7. Ілюстрація смартфона — намальована CSS, окреме фото не потрібне */
+.phone-scene {
+    position: relative; min-height: 300px; display: flex;
+    align-items: end; justify-content: center; overflow: hidden;
+}
+.phone {
+    position: relative; z-index: 1; width: min(230px, 75%);
+    height: 275px; padding: 9px; margin-top: 20px;
+    border: 5px solid #263b55; border-bottom: 0;
+    border-radius: 30px 30px 0 0;
+    background: linear-gradient(145deg, #182b43, #050d1c);
+    box-shadow: 0 0 35px rgba(0,0,0,.5), 0 0 35px rgba(25,233,155,.08);
+    transform: rotate(-4deg) translateY(20px);
+}
+.phone-camera {
+    position: absolute; top: 7px; left: 50%; transform: translateX(-50%);
+    width: 48px; height: 7px; border-radius: 8px; background: #020914;
+}
+.phone-screen {
+    height: 100%; padding: 20px 9px 10px;
+    border-radius: 19px 19px 0 0;
+    background: linear-gradient(160deg, #10243a, #071426);
+}
+.phone-status { display: flex; justify-content: space-between; color: #c4d0df; font-size: 8px; margin-bottom: 28px; }
+.phone-notification {
+    display: flex; gap: 9px; padding: 11px 9px;
+    border-radius: 12px; background: #f4f7fb; color: #102139;
+    box-shadow: 0 8px 25px rgba(0,0,0,.2);
+}
+.notification-app-icon {
+    flex: 0 0 27px; width: 27px; height: 27px; display: grid; place-items: center;
+    border-radius: 9px; background: #09213a; font-size: 14px;
+}
+.phone-message { min-width: 0; flex: 1; }
+.phone-message-top { display: flex; justify-content: space-between; gap: 5px; font-size: 9px; }
+.phone-message time { color: #7d8b9c; font-size: 8px; }
+.phone-message p { margin-top: 6px; font-size: 8px; line-height: 1.35; }
+.floating-bell {
+    position: absolute; z-index: 2; top: 25px; right: 13%;
+    width: 43px; height: 43px; display: grid; place-items: center;
+    border-radius: 14px; color: #062016; background: linear-gradient(135deg, #9affd5, #12d990);
+    font-size: 25px; transform: rotate(12deg);
+    box-shadow: 0 0 25px rgba(25,233,155,.4);
+}
+.floating-bell span { position: absolute; top: 6px; right: 7px; width: 6px; height: 6px; border-radius: 50%; background: white; }
+.glow { position: absolute; border-radius: 50%; filter: blur(30px); }
+.glow-one { width: 150px; height: 150px; background: rgba(0,174,255,.14); bottom: 0; left: 12%; }
+.glow-two { width: 120px; height: 120px; background: rgba(25,233,155,.12); top: 20px; right: 15%; }
+.spark { position: absolute; color: var(--green); font-size: 25px; }
+.spark-one { top: 55px; left: 16%; }
+.spark-two { top: 105px; right: 8%; font-size: 16px; }
+.phone-caption {
+    position: absolute; bottom: 12px; right: 3%; color: var(--green);
+    font-size: 10px; line-height: 1.5; font-weight: 700; text-align: right;
+}
+
+/* 8. Налаштування другої вкладки */
+.settings-panel { grid-template-columns: .8fr 1.2fr; }
+.settings-intro p { max-width: 290px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.settings-list { display: grid; gap: 9px; }
+.setting-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 15px;
+    padding: 12px 13px; border: 1px solid var(--border);
+    border-radius: 11px; background: rgba(255,255,255,.025);
+}
+.setting-row strong, .setting-row small { display: block; }
+.setting-row strong { font-size: 11px; }
+.setting-row small { margin-top: 5px; color: var(--muted); font-size: 10px; line-height: 1.4; }
+.switch {
+    appearance: none; flex: 0 0 38px; width: 38px; height: 21px;
+    border-radius: 20px; background: #34445a; position: relative; cursor: pointer;
+    transition: .2s;
+}
+.switch::after {
+    content: ""; position: absolute; top: 3px; left: 3px;
+    width: 15px; height: 15px; border-radius: 50%; background: white; transition: .2s;
+}
+.switch:checked { background: var(--green-dark); }
+.switch:checked::after { left: 20px; }
+.settings-note {
+    grid-column: 1 / -1; display: flex; gap: 8px; align-items: start;
+    padding: 11px 13px; border-radius: 9px; background: rgba(25,233,155,.06);
+    color: var(--muted); font-size: 10px; line-height: 1.5;
+}
+.settings-note span { color: var(--green); }
+
+/* 9. Нижній блок зі списком товарів */
+.watched-products { margin-top: 18px; padding: 20px 22px; }
+.watched-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 15px; }
+.watched-heading h2 { font-size: 15px; margin-bottom: 5px; }
+.watched-heading p { color: var(--muted); font-size: 11px; }
+.watched-heading a { color: var(--green); font-size: 11px; }
+.product-watch-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+.watch-card {
+    min-width: 0; display: flex; align-items: center; gap: 9px;
+    padding: 12px; border: 1px solid var(--border); border-radius: 11px;
+    background: rgba(255,255,255,.025);
+}
+.watch-emoji { font-size: 25px; }
+.watch-card div { flex: 1; min-width: 0; }
+.watch-card strong, .watch-card small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.watch-card strong { font-size: 10px; }
+.watch-card small { margin-top: 5px; color: var(--muted); font-size: 9px; }
+.watch-card b { color: var(--green); font-size: 11px; white-space: nowrap; }
+.page-footer { padding: 20px 0 5px; text-align: center; color: #60728b; font-size: 10px; }
+
+/* 10. Модальне вікно вибору товарів */
+.modal-backdrop {
+    position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
+    padding: 20px; background: rgba(0,5,14,.78); backdrop-filter: blur(7px);
+}
+.modal-backdrop[hidden] { display: none; }
+.product-modal {
+    position: relative; width: min(440px, 100%); padding: 27px;
+    border: 1px solid rgba(25,233,155,.2); border-radius: 18px;
+    background: #0b192d; box-shadow: 0 20px 70px rgba(0,0,0,.45);
+}
+.modal-close {
+    position: absolute; top: 13px; right: 16px; border: 0;
+    color: var(--muted); background: none; font-size: 25px;
+}
+.product-modal h2 { margin: 9px 0; font-size: 20px; }
+.product-modal > p { margin-bottom: 18px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+.modal-options { display: grid; gap: 9px; }
+.modal-options label {
+    display: flex; align-items: center; gap: 10px; padding: 11px;
+    border: 1px solid var(--border); border-radius: 9px; color: #dce5ef; font-size: 12px;
+}
+.modal-options input { accent-color: var(--green); }
+.modal-save { width: 100%; margin-top: 18px; }
+.toast {
+    position: fixed; z-index: 30; right: 22px; bottom: 22px;
+    padding: 12px 17px; border: 1px solid rgba(25,233,155,.25);
+    border-radius: 10px; background: #102139; color: var(--white);
+    font-size: 12px; opacity: 0; transform: translateY(10px); pointer-events: none;
+    transition: .25s;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* 11. Адаптація для менших екранів */
+@media (max-width: 1000px) {
+    .app-layout { grid-template-columns: 190px minmax(0,1fr); }
+    .main-content { padding: 18px; }
+    .tab-panel { gap: 10px; }
+    .product-watch-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+    .app-layout { grid-template-columns: 1fr; }
+    .sidebar { min-height: auto; padding: 12px; }
+    .sidebar-logo { margin-bottom: 12px; }
+    .sidebar-logo img { height: 42px; }
+    .sidebar-nav { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 5px; }
+    .sidebar-link { padding: 9px; font-size: 12px; }
+    .sidebar-bottom { display: none; }
+    .main-content { padding: 16px 12px; }
+    .page-heading { align-items: flex-start; flex-direction: column; }
+    .notifications-panel { padding: 16px; }
+    .tab-panel, .settings-panel { grid-template-columns: 1fr; padding: 20px 3px 5px; }
+    .phone-scene { min-height: 260px; }
+    .settings-note { grid-column: auto; }
+    .watched-products { padding: 16px; }
+    .watched-heading { align-items: flex-start; flex-direction: column; }
+}
+
+
+/* Приховуємо типи сповіщень, які користувач вимкнув у налаштуваннях. */
+.alert-list li[hidden] {
+    display: none;
+}

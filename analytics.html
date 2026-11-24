@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналітика цін | PriceTech</title>
+    <link rel="stylesheet" href="map.css">
+    <link rel="stylesheet" href="analytics.css">
+    <link rel="stylesheet" href="avatar.css">
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-logo"><img src="assets/logo.png" alt="PriceTech"></a>
+        <nav class="sidebar-nav" aria-label="Головна навігація">
+            <a href="index.html" class="sidebar-link"><span>⌂</span> Головна</a>
+            <a href="search.html" class="sidebar-link"><span>⌕</span> Пошук</a>
+            <a href="map.html" class="sidebar-link"><span>▧</span> Карта магазинів</a>
+            <a href="shopping-list.html" class="sidebar-link"><span>🛒</span> Список покупок</a>
+           <a href="calories.html" class="sidebar-link "><span>◉</span> Калорії</a>
+            <a href="analytics.html" class="sidebar-link active" aria-current="page"><span>▥</span> Аналітика цін</a>
+            <a href="notifications.html" class="sidebar-link"><span>♧</span> Сповіщення</a>
+            <a href="profile.html" class="sidebar-link"><span>♙</span> Профіль</a>
+        </nav>
+        <div class="sidebar-bottom"><p>PriceTech © 2026</p><p>Розумні покупки — ближче</p></div>
+    </aside>
+
+    <main class="main-content analytics-main">
+        <header class="topbar">
+            <div class="top-search">
+                <span>⌕</span>
+                <input type="text" id="top-search" placeholder="Я шукаю..." aria-label="Пошук товарів">
+            </div>
+            <div class="location"><span>📍</span><div><small>Ваше місце</small><p>Місцезнаходження не підключено</p></div></div>
+            <div class="top-actions">
+                <a class="icon-button" href="notifications.html" aria-label="Сповіщення">♧</a>
+                <a class="avatar guest-avatar" href="login.html" title="Увійти або зареєструватися" aria-label="Увійти або зареєструватися">♙</a>
+            </div>
+        </header>
+
+        <section class="page-heading analytics-heading">
+            <div>
+                <span class="eyebrow">PRICE INTELLIGENCE</span>
+                <h1>Історія та аналітика цін</h1>
+                <p>Відстежуй зміни вартості товарів та знаходь справжні знижки.</p>
+            </div>
+        </section>
+
+        <section class="analytics-layout">
+            <section class="panel history-panel">
+                <div class="panel-heading">
+                    <div><h2>Історія цін</h2></div>
+                </div>
+
+                <label class="analytics-product-search" for="product-select">
+                    <span>⌕</span>
+                    <select id="product-select">
+                        <option value="milk">Молоко</option>
+                        <option value="coffee">Кава мелена</option>
+                        <option value="eggs">Яйця курячі</option>
+                        <option value="pasta">Макарони</option>
+                    </select>
+                </label>
+
+                <div class="period-tabs" role="group" aria-label="Період графіка">
+                    <button type="button" class="period-button active" data-period="7" aria-pressed="true">7 днів</button>
+                    <button type="button" class="period-button" data-period="30" aria-pressed="false">30 днів</button>
+                    <button type="button" class="period-button" data-period="90" aria-pressed="false">3 місяці</button>
+                    <button type="button" class="period-button" data-period="180" aria-pressed="false">6 місяців</button>
+                </div>
+
+                <div class="chart-wrap">
+                    <canvas id="price-chart" aria-label="Графік історії цін"></canvas>
+                </div>
+                <div class="chart-foot"><span id="chart-range">01.11 — 07.11</span><span>Ціна, ₴</span></div>
+            </section>
+
+            <aside class="panel insights-panel">
+                <div class="panel-heading"><h2>Секрети знижок</h2></div>
+                <div class="deal-warning" id="deal-warning">
+                    <div class="warning-title"><span>⚠</span><strong>Ціна зараз на 28% вища, ніж була 2 тижні тому.</strong></div>
+                    <p>Можливо, це фейкова знижка?</p>
+                    <button type="button" id="details-button" class="outline-button">Детальніше</button>
+                </div>
+
+                <div class="price-facts">
+                    <div class="fact-row"><span>Сьогодні</span><strong id="today-price">42 ₴</strong></div>
+                    <div class="fact-row"><span>З тиждень тому</span><strong id="week-price">29 ₴</strong></div>
+                    <div class="fact-row"><span>Максимальна ціна</span><strong id="max-price">67 ₴</strong></div>
+                </div>
+                <div class="insight-extra" id="insight-extra" hidden>
+                    <strong>Як це працює?</strong>
+                    <p>PriceTech порівнює поточну вартість із попередніми цінами за вибраний період. Це демонстраційний висновок на тестових даних, а не підтвердження порушення магазином.</p>
+                </div>
+            </aside>
+        </section>
+
+        <footer class="page-footer">PriceTech © 2026 · Розумні покупки — ближче.</footer>
+    </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="analytics.js"></script>
+    <script type="module" src="avatar.js"></script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+/* PriceTech — сторінка аналізу харчування */
+.calories-main { min-width: 0; }
+.calories-heading { margin-bottom: 20px; }
+.calories-date {
+    padding: 9px 13px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--muted);
+    background: var(--panel);
+    font-size: 11px;
+    white-space: nowrap;
+}
+.calories-dashboard {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(300px, 1fr);
+    gap: 16px;
+    align-items: stretch;
+}
+.nutrition-panel, .foods-panel {
+    min-width: 0;
+    padding: 17px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+}
+.calories-main .panel-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+.calories-main .panel-heading h2 { font-size: 15px; }
+.calories-main .panel-heading p { margin-top: 5px; color: var(--muted); font-size: 11px; }
+.mini-icon {
+    display: grid; place-items: center;
+    width: 38px; height: 38px;
+    border-radius: 11px;
+    color: var(--green);
+    background: rgba(25,233,155,.10);
+    font-size: 21px;
+}
+.nutrition-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 20px;
+    padding: 12px 2px 17px;
+}
+.donut-chart {
+    --protein: 13%;
+    --fat: 39%;
+    position: relative;
+    flex: 0 0 178px;
+    width: 178px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: conic-gradient(
+        #19e99b 0 var(--protein),
+        #f5c84b var(--protein) calc(var(--protein) + var(--fat)),
+        #168bd5 calc(var(--protein) + var(--fat)) 100%
+    );
+    display: grid;
+    place-items: center;
+    box-shadow: 0 0 24px rgba(25,233,155,.08);
+}
+.donut-hole {
+    width: 67%;
+    height: 67%;
+    border-radius: 50%;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.donut-hole strong { font-size: 24px; letter-spacing: -.5px; }
+.donut-hole span { color: var(--muted); font-size: 11px; margin-top: 3px; }
+.macro-legend { display: grid; gap: 17px; min-width: 0; flex: 1; }
+.macro-legend > div {
+    display: grid;
+    grid-template-columns: 9px minmax(48px,1fr) auto;
+    align-items: center;
+    gap: 7px;
+    color: #bdcadd;
+    font-size: 11px;
+}
+.macro-legend strong { color: #eaf3ff; font-size: 10px; white-space: nowrap; }
+.macro-dot { width: 8px; height: 8px; border-radius: 50%; }
+.protein { background: #19e99b; }
+.fat { background: #f5c84b; }
+.carbs { background: #168bd5; }
+.nutrition-note {
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 10px;
+    line-height: 1.5;
+}
+.text-button {
+    border: 0; background: transparent; color: var(--green);
+    font-size: 11px; cursor: pointer;
+}
+.text-button:hover { color: #8fffd0; }
+.add-food-form { display: flex; gap: 8px; margin-bottom: 10px; }
+.add-food-form select {
+    min-width: 0; flex: 1;
+    padding: 10px 11px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: #102139; color: #eaf3ff;
+    font-size: 11px; outline: none;
+}
+.add-food-form option { background: #102139; }
+.add-food-button {
+    padding: 0 13px;
+    border: 0; border-radius: 9px;
+    color: #04150f; background: linear-gradient(135deg,#26f0a5,#08c987);
+    font-size: 11px; font-weight: 700;
+}
+.food-list { list-style: none; display: grid; }
+.food-item {
+    display: flex; align-items: center; gap: 11px;
+    min-height: 57px; padding: 8px 3px;
+    border-bottom: 1px solid rgba(255,255,255,.055);
+}
+.food-emoji {
+    display: grid; place-items: center;
+    width: 36px; height: 36px; flex: 0 0 36px;
+    border-radius: 10px; background: #102139;
+    font-size: 20px;
+}
+.food-info { min-width: 0; flex: 1; display: grid; gap: 4px; }
+.food-info strong { font-size: 12px; font-weight: 600; }
+.food-info small { color: var(--muted); font-size: 10px; }
+.remove-food {
+    width: 28px; height: 28px;
+    border: 0; border-radius: 8px;
+    color: var(--muted); background: transparent;
+    font-size: 23px; cursor: pointer;
+}
+.remove-food:hover { color: #ff7777; background: rgba(255,100,100,.08); }
+.empty-foods { padding: 22px 5px; color: var(--muted); font-size: 11px; text-align: center; }
+.foods-footnote { padding-top: 10px; color: var(--muted); font-size: 9px; }
+.calories-info {
+    display: flex; align-items: flex-start; gap: 10px;
+    margin-top: 16px; padding: 13px 15px;
+    border: 1px solid rgba(25,233,155,.12);
+    border-radius: 11px; background: rgba(25,233,155,.055);
+    color: #9fb4ca; font-size: 10px; line-height: 1.55;
+}
+.info-symbol { color: var(--green); font-size: 15px; }
+.calories-main .page-footer { padding-top: 22px; }
+@media (max-width: 950px) {
+    .calories-dashboard { grid-template-columns: 1fr; }
+    .nutrition-content { justify-content: flex-start; padding-left: 8%; }
+}
+@media (max-width: 520px) {
+    .main-content { padding: 16px 13px; }
+    .nutrition-panel, .foods-panel { padding: 13px; }
+    .nutrition-content { gap: 13px; padding-left: 0; }
+    .donut-chart { flex-basis: 135px; width: 135px; }
+    .donut-hole strong { font-size: 19px; }
+    .macro-legend { gap: 12px; }
+    .macro-legend > div { grid-template-columns: 8px 1fr; }
+    .macro-legend strong { grid-column: 2; }
+    .calories-heading { align-items: flex-start; }
+}
