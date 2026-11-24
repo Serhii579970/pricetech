@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сповіщення про знижки | PriceTech</title>
+    <link rel="stylesheet" href="notifications.css">
+    <link rel="stylesheet" href="avatar.css">
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-logo">
+            <img src="assets/logo.png" alt="PriceTech">
+        </a>
+
+        <nav class="sidebar-nav" aria-label="Головна навігація">
+            <a href="index.html" class="sidebar-link"><span>⌂</span> Головна</a>
+            <a href="search.html" class="sidebar-link"><span>⌕</span> Пошук</a>
+            <a href="map.html" class="sidebar-link"><span>▧</span> Карта магазинів</a>
+            <a href= "shopping-list.html" class="sidebar-link"><span>🛒</span> Список покупок</a>
+              <a href="calories.html" class="sidebar-link "><span>◉</span> Калорії</a>
+           <a href="analytics.html" class="sidebar-link " ><span>▥</span> Аналітика цін</a>
+            <a href="notifications.html" class="sidebar-link active" aria-current="page"><span>♧</span> Сповіщення</a>
+            <a href="profile.html" class="sidebar-link"><span>♙</span> Профіль</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <p>PriceTech © 2026</p>
+            <p>Розумні покупки — ближче</p>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+           
+            <div class="topbar-spacer"></div>
+            <a class="top-icon" href="notifications.html" aria-label="Сповіщення" title="Сповіщення">♧<i></i></a>
+            <a class="avatar guest-avatar" href="login.html" aria-label="Увійти або зареєструватися">♙</a>
+        </header>
+
+        <section class="page-heading">
+            <div>
+                <span class="eyebrow">PRICE ALERTS</span>
+                <h1>Сповіщення про знижки</h1>
+                <p>Стеж за цінами на улюблені товари та не пропускай вигідні пропозиції.</p>
+            </div>
+            <div class="heading-status"><span class="status-dot"></span> Сповіщення активні</div>
+        </section>
+
+        <section class="notifications-panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Твої сповіщення</h2>
+                    <p>Керуй товарами та повідомленнями PriceTech</p>
+                </div>
+                <span class="bell-large" aria-hidden="true">♧</span>
+            </div>
+
+            <div class="tabs" role="tablist" aria-label="Розділи сповіщень">
+                <button class="tab-button active" id="favorites-tab" type="button" role="tab"
+                    aria-selected="true" aria-controls="favorites-panel">Обрані товари</button>
+                <button class="tab-button" id="settings-tab" type="button" role="tab"
+                    aria-selected="false" aria-controls="settings-panel">Налаштування</button>
+            </div>
+
+            <section class="tab-panel" id="favorites-panel" role="tabpanel" aria-labelledby="favorites-tab">
+                <div class="notification-copy">
+                    <div class="section-kicker">ВАШІ СПОВІЩЕННЯ</div>
+                    <h3>Ви отримуєте сповіщення про:</h3>
+                    <ul class="alert-list">
+                        <li data-notification="sales"><span class="check-icon">✓</span><span>Початок розпродажів</span></li>
+                        <li data-notification="price"><span class="check-icon">✓</span><span>Зміну цін на обрані товари</span></li>
+                        <li data-notification="nearby"><span class="check-icon">✓</span><span>Акційні пропозиції у найближчих магазинах</span></li>
+                        <li data-notification="upcoming"><span class="check-icon">✓</span><span>Майбутні знижки</span></li>
+                    </ul>
+
+                    <div class="watched-summary">
+                        <div class="summary-icon">♡</div>
+                        <div><strong><span id="watched-count">3</span> товари під наглядом</strong>
+                            <small>Демо-список для попереднього перегляду</small></div>
+                    </div>
+                    <button class="primary-button" id="choose-products" type="button">
+                        Обрати товари <span aria-hidden="true">→</span>
+                    </button>
+                </div>
+
+                <div class="phone-scene" aria-label="Приклад сповіщення PriceTech на смартфоні">
+                    <div class="glow glow-one"></div>
+                    <div class="glow glow-two"></div>
+                    <span class="spark spark-one">✦</span>
+                    <span class="spark spark-two">✦</span>
+                    <div class="phone">
+                        <div class="phone-camera"></div>
+                        <div class="phone-screen">
+                            <div class="phone-status"><span>9:41</span><span>● ● ▰</span></div>
+                            <div class="phone-notification">
+                                <div class="notification-app-icon">🛒</div>
+                                <div class="phone-message">
+                                    <div class="phone-message-top"><strong>PriceTech</strong><time>10:24</time></div>
+                                    <p>🔥 Знижка на молоко 2,5%!</p>
+                                    <p>Сьогодні в АТБ -20%</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="floating-bell">♧<span></span></div>
+                    <div class="phone-caption">Вигідні покупки<br>починаються вчасно</div>
+                </div>
+            </section>
+
+            <section class="tab-panel settings-panel" id="settings-panel" role="tabpanel"
+                aria-labelledby="settings-tab" hidden>
+                <div class="settings-intro">
+                    <div class="section-kicker">ПЕРСОНАЛІЗАЦІЯ</div>
+                    <h3>Які повідомлення надсилати?</h3>
+                    <p>Увімкни потрібні типи сповіщень. Налаштування зберігаються в цьому браузері.</p>
+                </div>
+                <div class="settings-list">
+                    <label class="setting-row">
+                        <span><strong>Початок розпродажів</strong><small>Повідомляти про нові акції в магазинах поруч</small></span>
+                        <input type="checkbox" class="switch" data-setting="sales" checked>
+                    </label>
+                    <label class="setting-row">
+                        <span><strong>Зміна ціни на обрані товари</strong><small>Коли ціна знижується або зростає</small></span>
+                        <input type="checkbox" class="switch" data-setting="price" checked>
+                    </label>
+                    <label class="setting-row">
+                        <span><strong>Акції у найближчих магазинах</strong><small>Пропозиції з урахуванням відстані</small></span>
+                        <input type="checkbox" class="switch" data-setting="nearby" checked>
+                    </label>
+                    <label class="setting-row">
+                        <span><strong>Майбутні знижки</strong><small>Нагадування про очікувані розпродажі</small></span>
+                        <input type="checkbox" class="switch" data-setting="upcoming" checked>
+                    </label>
+                </div>
+                <div class="settings-note"><span>ⓘ</span> Це демонстраційні налаштування інтерфейсу. Реальні push-повідомлення підключаються окремо.</div>
+            </section>
+        </section>
+
+        <section class="watched-products">
+            <div class="watched-heading">
+                <div><h2>Товари, за якими стежимо</h2><p>Приклад обраних товарів</p></div>
+                <a href="search.html">Знайти товари <span>→</span></a>
+            </div>
+            <div class="product-watch-grid" id="watched-products">
+                <article class="watch-card" data-product="Молоко 2,5%">
+                    <span class="watch-emoji">🥛</span><div><strong>Молоко 2,5%</strong><small>АТБ · ціна знизилась</small></div><b>42 ₴</b>
+                </article>
+                <article class="watch-card" data-product="Кава мелена">
+                    <span class="watch-emoji">☕</span><div><strong>Кава мелена</strong><small>Сільпо · очікуємо знижку</small></div><b>129 ₴</b>
+                </article>
+                <article class="watch-card" data-product="Яйця курячі">
+                    <span class="watch-emoji">🥚</span><div><strong>Яйця курячі</strong><small>Ашан · ціна стабільна</small></div><b>49,90 ₴</b>
+                </article>
+            </div>
+        </section>
+        <footer class="page-footer">PriceTech © 2026 · Розумні покупки — ближче.</footer>
+    </main>
+</div>
+
+<div class="modal-backdrop" id="product-modal" hidden>
+    <section class="product-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <button class="modal-close" id="close-modal" type="button" aria-label="Закрити">×</button>
+        <span class="section-kicker">WATCHLIST</span>
+        <h2 id="modal-title">Обери товари для відстеження</h2>
+        <p>Познач товари, про зміну ціни яких хочеш дізнаватися.</p>
+        <div class="modal-options">
+            <label><input type="checkbox" checked> 🥛 Молоко 2,5%</label>
+            <label><input type="checkbox" checked> ☕ Кава мелена</label>
+            <label><input type="checkbox" checked> 🥚 Яйця курячі</label>
+            <label><input type="checkbox"> 🍎 Яблука</label>
+            <label><input type="checkbox"> 🍝 Макарони</label>
+        </div>
+        <button class="primary-button modal-save" id="save-products" type="button">Зберегти вибір</button>
+    </section>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="notifications.js"></script>
+    <script type="module" src="avatar.js"></script>
+</body>
+</html>

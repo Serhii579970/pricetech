@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050d1c">
+    <title>Список покупок | PriceTech</title>
+    <link rel="stylesheet" href="shopping-list.css">
+    <link rel="stylesheet" href="avatar.css">
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-logo" aria-label="PriceTech — головна">
+            <img src="assets/logo.png" alt="PriceTech">
+        </a>
+
+        <nav class="sidebar-nav" aria-label="Головна навігація">
+            <a href="index.html" class="sidebar-link"><span>⌂</span> Головна</a>
+            <a href="search.html" class="sidebar-link"><span>⌕</span> Пошук</a>
+            <a href="map.html" class="sidebar-link"><span>▧</span> Карта магазинів</a>
+            <a href="shopping-list.html" class="sidebar-link active" aria-current="page"><span>🛒</span> Список покупок</a>
+            <a href="calories.html" class="sidebar-link"><span>◉</span> Калорії</a>
+            <a href="analytics.html" class="sidebar-link"><span>▥</span> Аналітика цін</a>
+            <a href="notifications.html" class="sidebar-link"><span>♧</span> Сповіщення</a>
+            <a href="profile.html" class="sidebar-link"><span>♙</span> Профіль</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <p>PriceTech © 2026</p>
+            <p>Розумні покупки — ближче</p>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="topbar-spacer"></div>
+            <a class="top-icon" href="notifications.html" aria-label="Сповіщення" title="Сповіщення">♧<i></i></a>
+            <a class="account-link" id="account-link" href="login.html" aria-label="Увійти до акаунта">Увійти</a>
+        </header>
+
+        <div class="guest-notice" id="guest-notice" hidden>
+            <div class="guest-notice-icon" aria-hidden="true">✦</div>
+            <div class="guest-notice-copy">
+                <strong>Ти користуєшся PriceTech як гість</strong>
+                <p>Список тимчасовий і зникне після оновлення або закриття сторінки. Створи акаунт, щоб зберігати покупки.</p>
+            </div>
+            <div class="guest-notice-actions">
+                <a href="login.html">Увійти</a>
+                <a href="register.html">Зареєструватися</a>
+            </div>
+        </div>
+
+        <div class="storage-warning" id="storage-warning" role="alert" hidden>
+            Не вдалося підключити збереження списку. Перевір налаштування таблиці Supabase та онови сторінку.
+        </div>
+
+        <section class="page-heading">
+            <div>
+                <span class="eyebrow">SMART SHOPPING PLANNER</span>
+                <h1>Оптимізатор списку покупок</h1>
+                <p>Додавай потрібні товари та плануй зручніші покупки.</p>
+            </div>
+            <span class="heading-pill"><i></i> Розумна економія</span>
+        </section>
+
+        <section class="planner-grid">
+            <section class="panel list-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Твій список покупок</h2>
+                        <p><span id="items-count">0</span> товарів у списку</p>
+                    </div>
+                    <button class="text-button" id="edit-list" type="button" aria-expanded="false">Редагувати</button>
+                </div>
+
+                <form class="add-item-form" id="add-item-form">
+                    <label class="sr-only" for="new-item-name">Назва товару</label>
+                    <input id="new-item-name" type="text" placeholder="Наприклад, молоко" maxlength="45" autocomplete="off" required>
+                    <label class="sr-only" for="new-item-quantity">Кількість</label>
+                    <input id="new-item-quantity" type="text" placeholder="1 шт." maxlength="15" autocomplete="off">
+                    <button type="submit" aria-label="Додати товар">+</button>
+                </form>
+
+                <ul class="shopping-items" id="shopping-items" aria-live="polite"></ul>
+                <div class="empty-state" id="empty-state">
+                    <span aria-hidden="true">🛍️</span>
+                    <strong>Твій список поки порожній</strong>
+                    <p>Натисни «Редагувати», щоб додати перший товар.</p>
+                </div>
+
+                <div class="list-footer">
+                    <span id="storage-status">Тимчасовий список гостя</span>
+                    <button id="clear-list" type="button" class="subtle-button">Очистити</button>
+                </div>
+            </section>
+
+            <section class="panel options-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Варіанти покупок</h2>
+                        <p>Демонстраційне порівняння маршрутів</p>
+                    </div>
+                </div>
+
+                <button class="option-card selected" data-option="one" type="button" aria-pressed="true">
+                    <span class="option-icon">▣</span>
+                    <span class="option-copy">
+                        <strong>Купити все в одному магазині</strong>
+                        <small>Швидше та зручніше, без зайвих переїздів</small>
+                        <small class="option-meta">≈ 20–30 хв · 2,4 км</small>
+                        <b>472 ₴</b>
+                    </span>
+                    <span class="option-action">Обрати</span>
+                </button>
+
+                <button class="option-card" data-option="split" type="button" aria-pressed="false">
+                    <span class="option-icon">♧</span>
+                    <span class="option-copy">
+                        <strong>Розділити між 2–3 магазинами</strong>
+                        <small>Порівняти умовні ціни в різних магазинах</small>
+                        <small class="option-meta">≈ 45 хв · 5,8 км</small>
+                        <b>428 ₴</b>
+                    </span>
+                    <span class="option-action">Обрати</span>
+                </button>
+
+                <div class="comparison-note" id="comparison-note" aria-live="polite">
+                    <span>✓</span>
+                    <p>Обрано демонстраційний швидкий варіант: усі покупки в одному магазині.</p>
+                </div>
+            </section>
+
+            <aside class="panel route-panel">
+                <div class="panel-heading">
+                    <div>
+                        <h2>Схема маршруту</h2>
+                        <p id="route-caption">Один магазин</p>
+                    </div>
+                    <span class="demo-label">ДЕМО</span>
+                </div>
+                <div class="route-map" role="img" aria-label="Демонстраційна схема маршруту між магазинами">
+                    <div class="map-block block-a"></div>
+                    <div class="map-block block-b"></div>
+                    <div class="map-block block-c"></div>
+                    <div class="map-block block-d"></div>
+                    <div class="map-road road-one"></div>
+                    <div class="map-road road-two"></div>
+                    <div class="map-road road-three"></div>
+                    <svg class="route-line" viewBox="0 0 260 180" preserveAspectRatio="none" aria-hidden="true">
+                        <path id="route-path" d="M45 120 C65 95 85 105 110 70 S165 45 205 25"></path>
+                    </svg>
+                    <span class="map-pin pin-user">●</span>
+                    <span class="map-pin pin-store pin-one">А</span>
+                    <span class="map-pin pin-store pin-two" id="pin-two" hidden>С</span>
+                    <span class="map-pin pin-store pin-three" id="pin-three" hidden>V</span>
+                    <span class="map-label">PriceTech route · demo</span>
+                    <a href="map.html" class="open-map" aria-label="Відкрити карту магазинів">↗</a>
+                </div>
+                <div class="saving-card">
+                    <div><small>Демонстраційна економія</small><strong id="saving-amount">0 ₴</strong></div>
+                    <span id="saving-percent">0%</span>
+                </div>
+                <button class="primary-button full-button" id="confirm-plan" type="button">Підтвердити план <span>→</span></button>
+            </aside>
+        </section>
+
+        <section class="details-panel panel">
+            <div class="details-heading">
+                <div>
+                    <h2>Порівняння варіантів</h2>
+                    <p>Приклад розрахунку — ціни поки не беруться з реальних магазинів.</p>
+                </div>
+                <span class="demo-label">ДЕМО-ДАНІ</span>
+            </div>
+            <div class="comparison-grid">
+                <div class="comparison-stat"><small>Один магазин</small><strong>472 ₴</strong><span>≈ 20–30 хв · 2,4 км</span></div>
+                <div class="comparison-stat best"><small>2–3 магазини</small><strong>428 ₴</strong><span>≈ 45 хв · 5,8 км</span></div>
+                <div class="comparison-stat"><small>Різниця у вартості</small><strong>44 ₴</strong><span>Економія за умовними цінами</span></div>
+            </div>
+        </section>
+
+        <footer class="page-footer">PriceTech © 2026 · Розумні покупки — ближче.</footer>
+    </main>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="shopping-list.js"></script>
+    <script type="module" src="avatar.js"></script>
+</body>
+</html>

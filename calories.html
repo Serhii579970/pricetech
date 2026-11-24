@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калорії | PriceTech</title>
+    <link rel="stylesheet" href="map.css">
+    <link rel="stylesheet" href="calories.css">
+    <link rel="stylesheet" href="avatar.css">
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-logo"><img src="assets/logo.png" alt="PriceTech"></a>
+        <nav class="sidebar-nav" aria-label="Головна навігація">
+            <a href="index.html" class="sidebar-link"><span>⌂</span> Головна</a>
+            <a href="search.html" class="sidebar-link"><span>⌕</span> Пошук</a>
+            <a href="map.html" class="sidebar-link"><span>▧</span> Карта магазинів</a>
+            <a href="shopping-list.html" class="sidebar-link"><span>🛒</span> Список покупок</a>
+            <a href="calories.html" class="sidebar-link active" aria-current="page"><span>◉</span> Калорії</a>
+            <a href="analytics.html" class="sidebar-link"><span>▥</span> Аналітика цін</a>
+            <a href="notifications.html" class="sidebar-link"><span>♧</span> Сповіщення</a>
+            <a href="profile.html" class="sidebar-link"><span>♙</span> Профіль</a>
+        </nav>
+        <div class="sidebar-bottom"><p>PriceTech © 2026</p><p>Розумні покупки — ближче</p></div>
+    </aside>
+
+    <main class="main-content calories-main">
+        <header class="topbar">
+            <div class="top-search">
+                <span>⌕</span>
+                <input id="top-search" type="text" placeholder="Я шукаю..." aria-label="Пошук товарів">
+            </div>
+            <div class="location"><span>📍</span><div><small>Ваше місце</small><p>Місцезнаходження не підключено</p></div></div>
+            <div class="top-actions">
+                <a class="icon-button" href="notifications.html" aria-label="Сповіщення">♧</a>
+                <a class="avatar guest-avatar" href="login.html" title="Увійти або зареєструватися" aria-label="Увійти або зареєструватися">♙</a>
+            </div>
+        </header>
+
+        <section class="page-heading calories-heading">
+            <div>
+                <span class="eyebrow">FOOD & NUTRITION</span>
+                <h1>Аналіз харчування та калорій</h1>
+                <p>Переглядай поживну цінність продуктів у своєму списку.</p>
+            </div>
+            <span class="calories-date" id="today-date">Сьогодні</span>
+        </section>
+
+        <section class="calories-dashboard">
+            <section class="panel nutrition-panel">
+                <div class="panel-heading">
+                    <div><h2>Загальна калорійність</h2><p>Сума для доданих продуктів</p></div>
+                    <span class="mini-icon">◉</span>
+                </div>
+                <div class="nutrition-content">
+                    <div class="donut-chart" id="macro-chart" role="img" aria-label="Розподіл білків, жирів та вуглеводів">
+                        <div class="donut-hole"><strong id="total-calories">1 243</strong><span>ккал</span></div>
+                    </div>
+                    <div class="macro-legend">
+                        <div><i class="macro-dot protein"></i><span>Білки</span><strong id="protein-value">42 г (13%)</strong></div>
+                        <div><i class="macro-dot fat"></i><span>Жири</span><strong id="fat-value">56 г (39%)</strong></div>
+                        <div><i class="macro-dot carbs"></i><span>Вуглеводи</span><strong id="carbs-value">134 г (48%)</strong></div>
+                    </div>
+                </div>
+                <p class="nutrition-note">Орієнтовні значення залежать від продукту, порції та способу приготування.</p>
+            </section>
+
+            <section class="panel foods-panel">
+                <div class="panel-heading">
+                    <div><h2>Ваші продукти</h2><p><span id="food-count">4</span> позиції у списку</p></div>
+                    <button type="button" class="text-button" id="reset-foods">Очистити</button>
+                </div>
+
+                <form class="add-food-form" id="add-food-form">
+                    <label class="sr-only" for="food-select">Оберіть продукт</label>
+                    <select id="food-select">
+                        <option value="banana">Банан</option>
+                        <option value="chicken">Куряче філе</option>
+                        <option value="buckwheat">Гречка варена</option>
+                        <option value="yogurt">Йогурт натуральний</option>
+                        <option value="apple">Яблуко</option>
+                        <option value="egg">Яйце варене</option>
+                        <option value="oats">Вівсянка</option>
+                    </select>
+                    <button type="submit" class="add-food-button">Додати +</button>
+                </form>
+
+                <ul class="food-list" id="food-list" aria-live="polite">
+                    <li class="food-item" data-id="1"><span class="food-emoji">🍌</span><span class="food-info"><strong>Банан</strong><small>120 г · 105 ккал</small></span><button type="button" class="remove-food" aria-label="Видалити Банан">›</button></li>
+                    <li class="food-item" data-id="2"><span class="food-emoji">🍗</span><span class="food-info"><strong>Куряче філе</strong><small>200 г · 330 ккал</small></span><button type="button" class="remove-food" aria-label="Видалити Куряче філе">›</button></li>
+                    <li class="food-item" data-id="3"><span class="food-emoji">🥣</span><span class="food-info"><strong>Гречка варена</strong><small>150 г · 165 ккал</small></span><button type="button" class="remove-food" aria-label="Видалити Гречка варена">›</button></li>
+                    <li class="food-item" data-id="4"><span class="food-emoji">🥛</span><span class="food-info"><strong>Йогурт натуральний</strong><small>150 г · 143 ккал</small></span><button type="button" class="remove-food" aria-label="Видалити Йогурт натуральний">›</button></li>
+                </ul>
+                <p class="empty-foods" id="empty-foods" hidden>Поки немає доданих продуктів. Обери продукт вище.</p>
+                <p class="foods-footnote">Демонстраційні дані · значення приблизні</p>
+            </section>
+        </section>
+
+        <section class="panel calories-info">
+            <span class="info-symbol">ⓘ</span>
+            <p>Калорійність і склад продуктів наведені для ознайомлення. Реальні показники можуть відрізнятися залежно від виробника та розміру порції.</p>
+        </section>
+
+        <footer class="page-footer">PriceTech © 2026 · Розумні покупки — ближче.</footer>
+    </main>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="calories.js"></script>
+    <script type="module" src="avatar.js"></script>
+</body>
+</html>
