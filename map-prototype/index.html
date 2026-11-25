@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта магазинів | PriceTech</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="pricetech-locator">
+        <!-- Верхня панель керування -->
+        <div class="pt-controls">
+            <!-- Пошук за містом -->
+            <div class="pt-search-wrapper">
+                <input type="text" id="citySearch" placeholder="Оберіть або введіть місто..." autocomplete="off">
+                <ul id="autocompleteList" class="pt-autocomplete-list"></ul>
+            </div>
+
+            <!-- Пошук за назвою магазину -->
+            <div class="pt-search-wrapper">
+                <input type="text" id="nameSearch" placeholder="Назва (напр. Експрес, Форум)..." autocomplete="off">
+            </div>
+
+            <!-- Єдина кнопка-перемикач: Моє місцезнаходження / Скинути -->
+            <button id="geoBtn" class="pt-btn">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M12 2L22 22L12 18L2 22L12 2Z"></path>
+                </svg>
+                Моє місцезнаходження
+            </button>
+        </div>
+
+        <!-- Основний контент: Список зліва, Карта справа -->
+        <div class="pt-content">
+            <div class="pt-sidebar">
+                <div id="storesList" class="pt-stores-list"></div>
+            </div>
+            <div class="pt-map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Підключення баз даних -->
+    <script src="storesDB.js"></script>
+    <script src="citiesDB.js"></script>
+
+    <!-- 2. Підключення бібліотеки MarkerClusterer -->
+    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+
+    <!-- 3. Основна логіка додатку -->
+    <script src="app.js"></script>
+
+    <!-- 4. Підключення Google Maps API -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAF8AIAgG7gm42AgAzgbYpwYtd56CmlaW8&callback=initMap"></script>
+
+</body>
+</html>
