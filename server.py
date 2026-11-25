@@ -55,7 +55,13 @@ SILPO_BRANCH = os.environ.get("SILPO_BRANCH", "00000000-0000-0000-0000-000000000
 SILPO_STORE = "Сільпо"
 # Категорії для імпорту: slug з адреси silpo.ua/category/<slug>, через кому; "slug=Мітка" задає
 # підпис на картці для товарів без знижки. Приклад: SILPO_CATEGORIES="15-povertayemo-balobonusamy=15% балобонусами,pyvo-100"
-SILPO_CATEGORIES = os.environ.get("SILPO_CATEGORIES", "15-povertayemo-balobonusamy=15% балобонусами")
+# За замовчуванням — основні відділи (морозиво окремо й перед «замороженою продукцією», щоб точно потрапило).
+SILPO_CATEGORIES = os.environ.get("SILPO_CATEGORIES", ",".join((
+    "molochni-produkty-ta-iaitsia-234", "frukty-ovochi-4788", "kovbasni-vyroby-i-m-iasni-delikatesy-4731",
+    "bakaliia-i-konservy-4870", "napoi-52", "solodoshchi-498", "morozyvo-i-deserty-5176",
+    "zamorozhena-produktsiia-264", "alkogol-22")))
+# Скільки найпопулярніших товарів брати з кожної категорії (порядок задає sortBy=popularity). 0 — усі.
+SILPO_TOP = int(os.environ.get("SILPO_TOP", "30"))
 SILPO_PAGE_SIZE = int(os.environ.get("SILPO_PAGE_SIZE", "100"))
 SILPO_MAX_ITEMS = int(os.environ.get("SILPO_MAX_ITEMS", "3000"))  # запобіжник на категорію
 # Параметри запиту товарів (як у запиті, який робить сам сайт у DevTools → Network → /products)
@@ -349,11 +355,12 @@ def fetch_silpo():
         slug, label = slug.strip(), label.strip()
         offset, total, got = 0, None, 0
         while total is None or offset < total:
-            q = SILPO_QUERY.format(limit=SILPO_PAGE_SIZE, offset=offset, slug=slug)
+            size = min(SILPO_PAGE_SIZE, SILPO_TOP) if SILPO_TOP > 0 else SILPO_PAGE_SIZE
+            q = SILPO_QUERY.format(limit=size, offset=offset, slug=slug)
             data = silpo_get("/v1/uk/branches/%s/products?%s" % (SILPO_BRANCH, q))
             items = data.get("items") or []
             total = int(data.get("total") or 0)
-            if total > SILPO_MAX_ITEMS:  # фільтр категорії, схоже, не спрацював
+            if SILPO_TOP <= 0 and total > SILPO_MAX_ITEMS:  # фільтр категорії, схоже, не спрацював
                 raise ValueError("Сільпо: %d товарів у відповіді для «%s» — перевірте SILPO_QUERY" % (total, slug))
             if not items:
                 break
@@ -368,6 +375,10 @@ def fetch_silpo():
                 seen.add(pid)
                 rows.append(row)
                 got += 1
+                if got == SILPO_TOP:
+                    break
+            if SILPO_TOP > 0 and got >= SILPO_TOP:
+                break
             offset += len(items)
             time.sleep(0.4)  # не навантажуємо API
         log("  Сільпо «%s»: %d товарів (заявлено %s)" % (slug, got, total))
@@ -483,8 +494,12 @@ def scheduler():
 STATIC = {"/": "index.html", "/index.html": "index.html",
           "/search.html": "search.html", "/search": "search.html",
           "/search.css": "search.css", "/search.js": "search.js",
-          "/style.css": "style.css", "/app.js": "app.js"}
+          "/style.css": "style.css", "/app.js": "app.js",
+          "/map.html": "map.html", "/map.css": "map.css", "/map.js": "map.js",
+          **{"/map-module/" + f: "map-module/" + f for f in (
+              "locator.js", "geo.js", "routing.js", "map-view.js", "map-module.css", "data/stores.json")}}
 TYPES = {".html": "text/html; charset=utf-8", ".css": "text/css; charset=utf-8",
+         ".json": "application/json; charset=utf-8",
          ".js": "text/javascript; charset=utf-8",
          ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".webp": "image/webp",
          ".gif": "image/gif", ".svg": "image/svg+xml", ".ico": "image/x-icon"}
@@ -496,7 +511,7 @@ def static_file(path):
     if not name and path.startswith("/assets/"):
         name = path.lstrip("/")
         parts = Path(name).parts
-        if ".." in parts or Path(name).suffix.lower() not in TYPES or Path(name).suffix.lower() in (".html", ".js", ".css"):
+        if ".." in parts or Path(name).suffix.lower() not in TYPES or Path(name).suffix.lower() in (".html", ".js", ".css", ".json"):
             return None
     if name and (ROOT / name).is_file():
         return name
