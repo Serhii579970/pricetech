@@ -1,0 +1,17 @@
+/* Лише те, чого немає в map.css: контейнер Leaflet, фільтри, прокрутка списку. */
+.map-canvas { position: absolute; inset: 0; z-index: 0; }
+.choice-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.choice-group { display: flex; gap: 6px; }
+.choice-group button {
+    border: 1px solid var(--border); background: var(--panel-light); color: #bdc9d8;
+    border-radius: 16px; padding: 6px 11px; font-size: 10px;
+}
+.choice-group button[aria-pressed="true"] { background: var(--green); color: #06150f; font-weight: bold; }
+.store-list { flex: 1 1 0; min-height: 360px; overflow-y: auto; margin-bottom: 12px; }
+#citySearch {
+    padding: 13px 16px; background: var(--panel-light); color: var(--white);
+    border: 1px solid var(--border); border-radius: 12px; outline: 0;
+}
+#citySearch::placeholder { color: var(--muted); }
+.store-card { flex-shrink: 0; cursor: pointer; }
+.external-route { display: inline-block; margin-top: 6px; color: var(--green); font-size: 10px; }

@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Карта магазинів | PriceTech</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link rel="stylesheet" href="map.css">
+    <link rel="stylesheet" href="map-module/map-module.css">
     <link rel="stylesheet" href="avatar.css">
 </head>
 <body>
@@ -43,7 +46,7 @@
                 <span>📍</span>
                 <div>
                     <small>Ваше місце</small>
-                    <p>Місцезнаходження не підключено</p>
+                    <p id="user-location-text">Місцезнаходження не визначено</p>
                 </div>
             </div>
             <div class="top-actions">
@@ -61,10 +64,11 @@
         </section>
 
         <section class="map-search-row">
-            <input id="citySearch" type="search" placeholder="Місто...">
+            <input id="citySearch" type="search" placeholder="Місто..." list="city-options" autocomplete="off">
+            <datalist id="city-options"></datalist>
             <label class="map-search" for="nameSearch">
                 <span>⌕</span>
-                <input id="nameSearch" type="search" placeholder="Пошук магазину або товару...">
+                <input id="nameSearch" type="search" placeholder="Назва або адреса магазину...">
                 <button id="clear-search" type="button" aria-label="Очистити пошук">×</button>
             </label>
             <button class="location-button" id="location-button" type="button">
@@ -77,48 +81,29 @@
                 <div class="map-card-top">
                     <div>
                         <h2>Магазини поруч</h2>
-                        <p>Демонстраційне розташування магазинів</p>
+                        <p>АТБ і Сільпо на карті OpenStreetMap</p>
                     </div>
-                    <span class="map-count"><strong id="visible-count">4</strong> магазини</span>
+                    <span class="map-count"><strong id="visible-count">0</strong> <span id="visible-label">магазинів</span></span>
                 </div>
 
-                <!-- Майбутній контейнер для справжньої карти.
-                     Розробники зможуть підключити Leaflet або іншу бібліотеку сюди. -->
-               <div class="map-placeholder" id="map" aria-label="Демонстраційна карта магазинів">
-                    <div class="map-art" id="map-art">
-                        <div class="map-water"></div>
-                        <div class="map-park park-one"></div>
-                        <div class="map-park park-two"></div>
-                        <div class="road road-a"></div>
-                        <div class="road road-b"></div>
-                        <div class="road road-c"></div>
-                        <div class="road road-d"></div>
-                        <div class="road road-e"></div>
-                        <div class="road road-f"></div>
-                        <div class="road road-g"></div>
-                        <div class="road road-h"></div>
-                        <div class="road road-i"></div>
-                        <div class="road-label label-one">ВУЛ. ЦЕНТРАЛЬНА</div>
-                        <div class="road-label label-two">ПР. МИРУ</div>
-                        <div class="road-label label-three">ВУЛ. ШЕВЧЕНКА</div>
-
-                        <button class="map-marker marker-atb selected" data-store="АТБ" style="--x:25%;--y:28%" aria-label="АТБ">АТБ</button>
-                        <button class="map-marker marker-silpo" data-store="Сільпо" style="--x:63%;--y:42%" aria-label="Сільпо">S</button>
-                        <button class="map-marker marker-varus" data-store="VARUS" style="--x:43%;--y:76%" aria-label="VARUS">V</button>
-                        <button class="map-marker marker-aushan" data-store="Ашан" style="--x:78%;--y:18%" aria-label="Ашан">А</button>
-
-                        <div class="user-location" title="Умовне місце користувача"><span></span></div>
+                <div class="choice-row">
+                    <div class="choice-group" id="chain-filter" role="group" aria-label="Мережа магазинів">
+                        <button type="button" data-value="all" aria-pressed="true">Усі</button>
+                        <button type="button" data-value="atb" aria-pressed="false">АТБ</button>
+                        <button type="button" data-value="silpo" aria-pressed="false">Сільпо</button>
                     </div>
+                    <div class="choice-group" id="route-mode" role="group" aria-label="Спосіб пересування">
+                        <button type="button" data-value="foot" aria-pressed="true">Пішки</button>
+                        <button type="button" data-value="car" aria-pressed="false">Авто</button>
+                    </div>
+                </div>
 
+                <div class="map-placeholder" id="map">
+                    <div class="map-canvas" id="map-canvas" aria-label="Карта магазинів"></div>
                     <div class="map-zoom">
                         <button type="button" id="zoom-in" aria-label="Збільшити карту">+</button>
                         <button type="button" id="zoom-out" aria-label="Зменшити карту">−</button>
                     </div>
-                    <div class="map-legend">
-                        <span><i class="legend-user"></i> Ви тут (умовно)</span>
-                        <span><i class="legend-store"></i> Магазини</span>
-                    </div>
-                    <div class="map-note">Макет карти · не відображає реальні адреси</div>
                 </div>
             </div>
 
@@ -126,56 +111,16 @@
                 <div class="stores-heading">
                     <div>
                         <h2>Найближчі магазини</h2>
-                        <p>Оберіть магазин для перегляду</p>
+                        <p id="list-hint">Оберіть магазин для перегляду</p>
                     </div>
                     <button type="button" id="sort-distance" class="sort-button">За відстанню ↕</button>
                 </div>
 
-                <div class="store-list" id="store-list">
-                    <article class="store-card selected" data-store-card="АТБ">
-                        <div class="store-logo logo-atb">АТБ</div>
-                        <div class="store-details">
-                            <h3>АТБ</h3>
-                            <p>вул. Центральна, 10</p>
-                            <span>● 0,8 км від вас</span>
-                            <button type="button" class="route-button" data-route="АТБ">Вибрати маршрут →</button>
-                        </div>
-                    </article>
-
-                    <article class="store-card" data-store-card="Сільпо">
-                        <div class="store-logo logo-silpo">С</div>
-                        <div class="store-details">
-                            <h3>Сільпо</h3>
-                            <p>пр. Миру, 24</p>
-                            <span>● 1,2 км від вас</span>
-                            <button type="button" class="route-button" data-route="Сільпо">Вибрати маршрут →</button>
-                        </div>
-                    </article>
-
-                    <article class="store-card" data-store-card="VARUS">
-                        <div class="store-logo logo-varus">V</div>
-                        <div class="store-details">
-                            <h3>VARUS</h3>
-                            <p>вул. Шевченка, 8</p>
-                            <span>● 1,5 км від вас</span>
-                            <button type="button" class="route-button" data-route="VARUS">Вибрати маршрут →</button>
-                        </div>
-                    </article>
-
-                    <article class="store-card" data-store-card="Ашан">
-                        <div class="store-logo logo-aushan">А</div>
-                        <div class="store-details">
-                            <h3>Ашан</h3>
-                            <p>вул. Торгова, 3</p>
-                            <span>● 2,3 км від вас</span>
-                            <button type="button" class="route-button" data-route="Ашан">Вибрати маршрут →</button>
-                        </div>
-                    </article>
-                </div>
+                <div class="store-list" id="store-list"></div>
                 <div class="no-stores" id="no-stores" hidden>Магазинів не знайдено. Спробуйте інший запит.</div>
-                <div class="selected-store-info" id="selected-store-info">
+                <div class="selected-store-info" id="selected-store-info" aria-live="polite">
                     <span class="info-icon">⌖</span>
-                    <div><strong>Обрано: АТБ</strong><small>Натисніть на інший магазин, щоб змінити вибір.</small></div>
+                    <div><strong>Завантаження…</strong></div>
                 </div>
             </aside>
         </section>
@@ -184,7 +129,9 @@
         <div class="toast" id="toast" role="status" aria-live="polite"></div>
     </main>
 </div>
-<script src="map.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script type="module" src="map.js"></script>
     <script type="module" src="avatar.js"></script>
 </body>
 </html>
