@@ -4,6 +4,7 @@
 Запуск:   python3 server.py        ->  http://localhost:8000
 Сільпо: товари тягнуться автоматично з офіційного JSON API silpo.ua
   (sf-ecom-api.silpo.ua) при кожному оновленні й додаються до решти даних.
+Ашан: так само автоматично, з каталогу auchan.zakaz.ua (stores-api.zakaz.ua), ціни оновлюються разом із сайтом.
 Інші джерела (за пріоритетом):
   1) ATB_FEED_URL  - офіційний/партнерський фід (JSON або CSV)
   2) папка pages/  - збережені вами сторінки категорій atbmarket.com
@@ -78,6 +79,42 @@ SILPO_HEADERS = {
 }
 SILPO_IMG = "https://images.silpo.ua/v2/products/300x300/webp/"
 SILPO_SITE = "https://silpo.ua/product/"
+
+# --- Ашан: автоматичне оновлення з каталогу auchan.zakaz.ua (API stores-api.zakaz.ua) -----------
+AUCHAN_ENABLED = os.environ.get("AUCHAN_ENABLED", "1").strip().lower() not in ("0", "false", "no", "")
+AUCHAN_API = os.environ.get("AUCHAN_API", "https://stores-api.zakaz.ua").rstrip("/")
+AUCHAN_SITE = "https://auchan.zakaz.ua"
+# id магазину Ашан на zakaz.ua (ціни й наявність залежать від магазину). 48246409 — Ашан у Львові.
+AUCHAN_STORE_ID = os.environ.get("AUCHAN_STORE_ID", "48246409").strip()
+AUCHAN_STORE = "Ашан"
+# Категорії: slug з адреси auchan.zakaz.ua/uk/categories/<slug>/, через кому; "slug=Назва" задає назву відділу на сайті.
+AUCHAN_CATEGORY_NAMES = {
+    "dairy-and-eggs-auchan": "Молочні продукти та яйця",
+    "fruits-and-vegetables-auchan": "Овочі та фрукти",
+    "meat-fish-poultry-auchan": "М'ясо, риба, птиця",
+    "bakery-auchan": "Хліб і випічка",
+    "grocery-and-sweets-auchan": "Бакалія",
+    "sweets-and-snacks-auchan": "Солодощі та снеки",
+    "canned-food-auchan": "Консерви",
+    "sauces-and-spices-auchan": "Соуси та спеції",
+    "drinks-auchan": "Напої",
+    "hot-drinks-auchan": "Чай і кава",
+    "frozen-auchan": "Заморожена продукція",
+    "ready-meals-auchan": "Готові страви",
+    "eighteen-plus-auchan": "Алкоголь",
+}
+AUCHAN_CATEGORIES = os.environ.get("AUCHAN_CATEGORIES", ",".join(AUCHAN_CATEGORY_NAMES))
+# Скільки перших (найпопулярніших у видачі каталогу) товарів брати з кожної категорії. 0 — усі.
+AUCHAN_TOP = int(os.environ.get("AUCHAN_TOP", "30"))
+AUCHAN_PAGE_SIZE = int(os.environ.get("AUCHAN_PAGE_SIZE", "30"))
+AUCHAN_MAX_ITEMS = int(os.environ.get("AUCHAN_MAX_ITEMS", "3000"))  # запобіжник на категорію
+AUCHAN_HEADERS = {
+    "User-Agent": SILPO_HEADERS["User-Agent"],
+    "Accept": "application/json, text/plain, */*",
+    "Accept-Language": "uk",
+    "Origin": AUCHAN_SITE,
+    "Referer": AUCHAN_SITE + "/",
+}
 
 
 def log(*a):
@@ -387,6 +424,105 @@ def fetch_silpo():
     return rows
 
 
+def auchan_get(path_query):
+    req = urllib.request.Request(AUCHAN_API + path_query, headers=AUCHAN_HEADERS)
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=30) as r:
+                return json.loads(r.read().decode("utf-8"))
+        except Exception:
+            if attempt == 2:
+                raise
+            time.sleep(2 * (attempt + 1))
+
+
+def kop(v):
+    """Ціна в копійках (як віддає zakaz.ua) -> гривні. None, якщо значення немає."""
+    try:
+        return round(float(v) / 100, 2) if v is not None else None
+    except (TypeError, ValueError):
+        return None
+
+
+def auchan_unit(it):
+    """Підпис одиниці виміру для картки: «кг», «300 г», «шт»."""
+    unit = str(it.get("unit") or "").lower()
+    if unit == "kg":
+        return "кг"
+    try:
+        w = float(it.get("weight") or 0)  # вага упаковки в грамах
+    except (TypeError, ValueError):
+        w = 0
+    if w >= 1000:
+        return ("%g кг" % round(w / 1000, 3)).replace(".", ",")
+    if w > 0:
+        return "%g г" % w
+    return "шт"
+
+
+def auchan_row(it, cat):
+    """Один товар Ашан (JSON з API zakaz.ua) -> рядок у нашому форматі."""
+    ean = it.get("ean") or it.get("id")
+    price = kop(it.get("price"))
+    if not ean or not it.get("title") or price is None or it.get("in_stock") is False:
+        return None
+    disc = it.get("discount") or {}
+    old = kop(disc.get("old_price")) if disc.get("status") else None
+    img = it.get("img") or {}
+    image = img.get("s350x350") or img.get("s350") or img.get("s150x150") if isinstance(img, dict) else None
+    link = it.get("web_url") or ""
+    if link.startswith("/"):
+        link = AUCHAN_SITE + link
+    return {
+        "key": "auchan:" + str(ean),
+        "name": " ".join(str(it["title"]).split()),
+        "brand": "%s · %s" % (auchan_unit(it), cat),
+        "category": cat,
+        "price": price,
+        "old": old,  # якщо є стара ціна, normalize() підставить «−N%»
+        "emoji": emoji_for(cat),
+        "store": AUCHAN_STORE,
+        "image": image,
+        "link": link or None,
+    }
+
+
+def fetch_auchan():
+    """Найпопулярніші товари заданих категорій Ашан -> рядки у нашому форматі (ціни свіжі при кожному оновленні)."""
+    rows, seen = [], set()
+    for spec in [c.strip() for c in AUCHAN_CATEGORIES.split(",") if c.strip()]:
+        slug, _, name = spec.partition("=")
+        slug = slug.strip()
+        cat = name.strip() or AUCHAN_CATEGORY_NAMES.get(slug) or slug.replace("-auchan", "").replace("-", " ").capitalize()
+        page, total, got = 1, None, 0
+        while total is None or got < min(total, AUCHAN_TOP or AUCHAN_MAX_ITEMS):
+            data = auchan_get("/stores/%s/categories/%s/products/?page=%d&per_page=%d"
+                              % (AUCHAN_STORE_ID, slug, page, AUCHAN_PAGE_SIZE))
+            items = data.get("results") or []
+            total = int(data.get("count") or len(items))
+            if not items:
+                break
+            for it in items:
+                row = auchan_row(it, cat)
+                if not row or row["key"] in seen:
+                    continue
+                seen.add(row["key"])
+                rows.append(row)
+                got += 1
+                if got == AUCHAN_TOP:
+                    break
+            if AUCHAN_TOP > 0 and got >= AUCHAN_TOP:
+                break
+            page += 1
+            if page > 500:  # запобіжник
+                break
+            time.sleep(0.4)  # не навантажуємо API
+        log("  Ашан «%s»: %d товарів (заявлено %s)" % (slug, got, total))
+    if not rows:
+        raise ValueError("Ашан: API не повернуло жодного товару")
+    return rows
+
+
 def fetch_rows():
     if FEED_URL:
         req = urllib.request.Request(FEED_URL, headers={"User-Agent": "PriceTechBot/1.0"})
@@ -440,9 +576,17 @@ def update():
             rows += base
             sources.append(src)
         except Exception as e:  # збій АТБ-джерела не повинен блокувати Сільпо
-            if not SILPO_ENABLED:
+            if not (SILPO_ENABLED or AUCHAN_ENABLED):
                 raise
             log("Інші джерела недоступні:", repr(e))
+        carry_stores = set()  # магазини, джерело яких зараз не відповіло: їхні попередні товари лишаються
+        if AUCHAN_ENABLED:
+            try:
+                rows += fetch_auchan()
+                sources.append("Ашан (API zakaz.ua)")
+            except Exception as e:
+                carry_stores.add(AUCHAN_STORE)
+                log("ПОМИЛКА Ашан (лишаю попередні товари):", repr(e))
         carry_silpo = False
         if SILPO_ENABLED:
             pages = read_silpo_pages()  # збережені сторінки з архіву — завжди «їдуть» з оновленням
@@ -463,7 +607,8 @@ def update():
         for p in previous:
             if p["id"] in have:
                 continue
-            if (p.get("store") == SILPO_STORE and carry_silpo) or p.get("store") not in stores:
+            if (p.get("store") == SILPO_STORE and carry_silpo) or p.get("store") in carry_stores \
+                    or p.get("store") not in stores:
                 carried.append(p)
         if carried:
             sources.append("попередні дані (%d)" % len(carried))
