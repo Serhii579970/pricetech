@@ -4,11 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Карта магазинів | PriceTech</title>
+
+    <!-- Стилі Leaflet та MarkerCluster -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+    <!-- Власні стилі -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="pricetech-locator">
+    <div class="pricetech-locator" id="pricetechLocator">
         <!-- Верхня панель керування -->
         <div class="pt-controls">
             <!-- Пошук за містом -->
@@ -23,20 +30,28 @@
             </div>
 
             <!-- Єдина кнопка-перемикач: Моє місцезнаходження / Скинути -->
-            <button id="geoBtn" class="pt-btn">
+            <button id="geoBtn" class="pt-btn" type="button">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                     <path d="M12 2L22 22L12 18L2 22L12 2Z"></path>
                 </svg>
                 Моє місцезнаходження
             </button>
+
+            <!-- Кнопка повноекранного режиму -->
+            <button id="fullscreenBtn" class="pt-btn pt-fullscreen-btn" type="button" title="На весь екран" aria-label="На весь екран">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                </svg>
+            </button>
         </div>
 
         <!-- Основний контент: Список зліва, Карта справа -->
         <div class="pt-content">
-            <div class="pt-sidebar">
+            <aside class="pt-sidebar" id="sidebar">
                 <div id="storesList" class="pt-stores-list"></div>
-            </div>
-            <div class="pt-map-container">
+            </aside>
+
+            <div class="pt-map-container" id="mapContainer">
                 <div id="map"></div>
             </div>
         </div>
@@ -46,14 +61,12 @@
     <script src="storesDB.js"></script>
     <script src="citiesDB.js"></script>
 
-    <!-- 2. Підключення бібліотеки MarkerClusterer -->
-    <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+    <!-- 2. Підключення Leaflet та MarkerCluster -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
 
     <!-- 3. Основна логіка додатку -->
     <script src="app.js"></script>
-
-    <!-- 4. Підключення Google Maps API -->
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAF8AIAgG7gm42AgAzgbYpwYtd56CmlaW8&callback=initMap"></script>
 
 </body>
 </html>

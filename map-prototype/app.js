@@ -1,9 +1,7 @@
-// app.js
+// app.js (Leaflet)
 
 let map;
-let markers = [];
 let markerCluster = null;
-let infoWindow;
 let userMarker = null;
 let userCoords = null;
 let isGeoActive = false;
@@ -14,9 +12,11 @@ const nameInput = document.getElementById('nameSearch');
 const autocompleteList = document.getElementById('autocompleteList');
 const storesListContainer = document.getElementById('storesList');
 const geoBtn = document.getElementById('geoBtn');
+const locatorContainer = document.getElementById('pricetechLocator');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
 
 // Дефолтний центр (Центр України)
-const defaultCenter = { lat: 48.3794, lng: 31.1656 };
+const defaultCenter = [48.3794, 31.1656];
 const defaultZoom = 6;
 
 const defaultBtnContent = `
@@ -33,38 +33,153 @@ const activeGeoBtnContent = `
     Скинути геолокацію
 `;
 
-// 1. Ініціалізація карти (прив'язана до глобального об'єкта window для Google Maps callback)
+const enterFullscreenIcon = `
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+    </svg>
+`;
+
+const exitFullscreenIcon = `
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
+    </svg>
+`;
+
+// Іконка позиції користувача
+const userLocationIcon = L.divIcon({
+    className: 'pt-user-marker',
+    html: '<div style="width:16px;height:16px;background:#4285F4;border:2px solid #ffffff;border-radius:50%;box-shadow:0 0 6px rgba(0,0,0,0.4);"></div>',
+    iconSize: [16, 16],
+    iconAnchor: [8, 8]
+});
+
+// 1. Ініціалізація карти
 function initMap() {
-    const mapElement = document.getElementById("map");
-    if (!mapElement) return;
+    const mapElement = document.getElementById('map');
+    if (!mapElement || typeof L === 'undefined') return;
 
-    map = new google.maps.Map(mapElement, {
-        center: defaultCenter,
-        zoom: defaultZoom,
-        mapTypeControl: false
-    });
+    map = L.map('map').setView(defaultCenter, defaultZoom);
 
-    infoWindow = new google.maps.InfoWindow();
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
     applyFilters(false);
 }
-window.initMap = initMap;
 
-// 2. Вибір міста зі списку
+// 2. Повноекранний режим з усіма елементами керування та списком
+function refreshMapLayout() {
+    if (!map) return;
+    map.invalidateSize({ pan: false });
+    requestAnimationFrame(() => {
+        if (map) map.invalidateSize({ pan: false });
+    });
+    setTimeout(() => {
+        if (map) map.invalidateSize({ pan: false });
+    }, 200);
+}
+
+function getNativeFullscreenElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+}
+
+function isFullscreenActive() {
+    return Boolean(getNativeFullscreenElement()) ||
+        Boolean(locatorContainer && locatorContainer.classList.contains('is-fullscreen'));
+}
+
+function applyFullscreenUI(isFull) {
+    if (!locatorContainer || !fullscreenBtn) return;
+
+    const nativeEl = getNativeFullscreenElement();
+    const useFallbackClass = isFull && !nativeEl;
+
+    locatorContainer.classList.toggle('is-fullscreen', useFallbackClass);
+    document.body.classList.toggle('pt-fullscreen-lock', isFull);
+
+    fullscreenBtn.innerHTML = isFull ? exitFullscreenIcon : enterFullscreenIcon;
+    fullscreenBtn.title = isFull ? 'Вийти з повного екрана' : 'На весь екран';
+    fullscreenBtn.setAttribute('aria-label', fullscreenBtn.title);
+
+    refreshMapLayout();
+}
+
+async function toggleMapFullscreen() {
+    if (!locatorContainer) return;
+
+    const nativeEl = getNativeFullscreenElement();
+    const currentlyFull = isFullscreenActive();
+
+    if (!currentlyFull) {
+        if (typeof locatorContainer.requestFullscreen === 'function') {
+            try {
+                await locatorContainer.requestFullscreen();
+                return;
+            } catch (_) {
+                applyFullscreenUI(true);
+                return;
+            }
+        }
+        if (typeof locatorContainer.webkitRequestFullscreen === 'function') {
+            try {
+                locatorContainer.webkitRequestFullscreen();
+                return;
+            } catch (_) {
+                applyFullscreenUI(true);
+                return;
+            }
+        }
+        applyFullscreenUI(true);
+    } else {
+        if (nativeEl) {
+            try {
+                if (document.fullscreenElement && typeof document.exitFullscreen === 'function') {
+                    await document.exitFullscreen();
+                } else if (document.webkitFullscreenElement && typeof document.webkitExitFullscreen === 'function') {
+                    document.webkitExitFullscreen();
+                }
+            } catch (_) {
+                // Ігноруємо помилку виходу, прибираємо fallback нижче
+            }
+        }
+        applyFullscreenUI(false);
+    }
+}
+
+if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', toggleMapFullscreen);
+}
+
+function handleFullscreenChange() {
+    applyFullscreenUI(Boolean(getNativeFullscreenElement()));
+}
+
+document.addEventListener('fullscreenchange', handleFullscreenChange);
+document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && locatorContainer && locatorContainer.classList.contains('is-fullscreen') && !getNativeFullscreenElement()) {
+        applyFullscreenUI(false);
+    }
+});
+
+// 3. Вибір міста зі списку
 function selectCity(city) {
     cityInput.value = city;
     autocompleteList.style.display = 'none';
     applyFilters(false);
 
     if (!city && !nameInput.value.trim()) {
-        map.setCenter(defaultCenter);
-        map.setZoom(defaultZoom);
+        map.setView(defaultCenter, defaultZoom);
     }
 }
 
-// 3. Головна функція фільтрації
-function applyFilters(onlyNearest = false) {
+// 4. Головна функція фільтрації
+function applyFilters(forceNearest = false) {
     if (!map) return;
 
+    const nearestMode = Boolean(userCoords && (isGeoActive || forceNearest));
     const cityFilter = cityInput.value.trim().toLowerCase();
     const nameFilter = nameInput.value.trim().toLowerCase();
 
@@ -84,15 +199,15 @@ function applyFilters(onlyNearest = false) {
         result = result.filter(store => store.name.toLowerCase().includes(nameFilter));
     }
 
-    if (onlyNearest && userCoords) {
+    if (nearestMode) {
         result.sort((a, b) => a.distance - b.distance);
         result = result.slice(0, 10);
     }
 
-    renderStores(result, onlyNearest);
+    renderStores(result, nearestMode);
 }
 
-// 4. Рендер магазинів у список, створення маркерів та кластерів
+// 5. Рендер магазинів у список, створення маркерів та кластерів
 function renderStores(storesToRender, highlightNearest = false) {
     storesListContainer.innerHTML = '';
     clearMarkers();
@@ -109,7 +224,23 @@ function renderStores(storesToRender, highlightNearest = false) {
         : `Знайдено магазинів: ${storesToRender.length}`;
     storesListContainer.appendChild(counterEl);
 
-    const bounds = new google.maps.LatLngBounds();
+    const useCluster = typeof L.markerClusterGroup === 'function';
+    const clusterLayer = useCluster
+        ? L.markerClusterGroup({
+            maxClusterRadius: 50,
+            iconCreateFunction: (cluster) => {
+                const count = cluster.getChildCount();
+                return L.divIcon({
+                    html: `<div style="width:40px;height:40px;line-height:40px;text-align:center;background:rgba(0,86,179,0.9);color:#ffffff;border:3px solid #ffffff;border-radius:50%;font-size:14px;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,0.3);">${count}</div>`,
+                    className: 'pt-cluster-icon',
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 20]
+                });
+            }
+        })
+        : L.layerGroup();
+
+    const bounds = L.latLngBounds();
     let nearestData = null;
 
     storesToRender.forEach((store, index) => {
@@ -132,14 +263,8 @@ function renderStores(storesToRender, highlightNearest = false) {
             <p><strong>Адреса:</strong> ${store.address}</p>
         `;
 
-        const marker = new google.maps.Marker({
-            position: { lat: store.lat, lng: store.lng },
-            map: map, // Додаємо одразу на карту, щоб маркери працювали навіть без кластеризатора
-            title: store.name
-        });
-
-        markers.push(marker);
-        bounds.extend(marker.getPosition());
+        const latLng = [store.lat, store.lng];
+        const marker = L.marker(latLng, { title: store.name });
 
         const distanceInfo = store.distance !== undefined
             ? `<p><strong>Відстань:</strong> ~${store.distance.toFixed(1)} км</p>`
@@ -150,81 +275,68 @@ function renderStores(storesToRender, highlightNearest = false) {
                 <h4>${store.name}</h4>
                 <p>${store.city}, ${store.address}</p>
                 ${distanceInfo}
-                <a href="https://www.google.com/maps/dir/?api=1&destination=${store.lat},${store.lng}" target="_blank">
+                <a href="https://www.google.com/maps/dir/?api=1&destination=${store.lat},${store.lng}" target="_blank" rel="noopener noreferrer">
                     Прокласти маршрут
                 </a>
             </div>
         `;
 
-        marker.addListener('click', () => {
-            openStoreInfo(marker, infoContent, storeEl);
+        marker.bindPopup(infoContent);
+        clusterLayer.addLayer(marker);
+        bounds.extend(latLng);
+
+        marker.on('click', () => {
+            highlightListItem(storeEl);
         });
 
         storeEl.addEventListener('click', () => {
-            map.panTo(marker.getPosition());
-            map.setZoom(16);
-            openStoreInfo(marker, infoContent, storeEl);
+            map.setView(latLng, 16, { animate: true });
+            if (useCluster && clusterLayer.zoomToShowLayer) {
+                clusterLayer.zoomToShowLayer(marker, () => {
+                    marker.openPopup();
+                });
+            } else {
+                marker.openPopup();
+            }
+            highlightListItem(storeEl);
         });
 
         storesListContainer.appendChild(storeEl);
 
         if (isNearest) {
-            nearestData = { marker, infoContent, storeEl };
+            nearestData = { marker, storeEl };
         }
     });
 
-    // Безпечна ініціалізація кластеризатора (якщо бібліотека завантажилась)
-    if (typeof markerClusterer !== 'undefined' && markerClusterer.MarkerClusterer) {
-        markerCluster = new markerClusterer.MarkerClusterer({
-            map: map,
-            markers: markers,
-            renderer: {
-                render: ({ count, position }) => {
-                    return new google.maps.Marker({
-                        position: position,
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 20,
-                            fillColor: "#0056b3",
-                            fillOpacity: 0.9,
-                            strokeColor: "#ffffff",
-                            strokeWeight: 3
-                        },
-                        label: {
-                            text: String(count),
-                            color: "#ffffff",
-                            fontSize: "14px",
-                            fontWeight: "bold"
-                        },
-                        title: `Магазинів у цій зоні: ${count}`,
-                        zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count
-                    });
-                }
-            }
-        });
-    }
+    markerCluster = clusterLayer;
+    map.addLayer(markerCluster);
 
     // Масштабування карти
     if (highlightNearest && nearestData && userMarker) {
-        const nearestBounds = new google.maps.LatLngBounds();
-        nearestBounds.extend(userMarker.getPosition());
-        nearestBounds.extend(nearestData.marker.getPosition());
+        const nearestBounds = L.latLngBounds([
+            userMarker.getLatLng(),
+            nearestData.marker.getLatLng()
+        ]);
 
-        map.fitBounds(nearestBounds);
-        openStoreInfo(nearestData.marker, nearestData.infoContent, nearestData.storeEl);
+        map.fitBounds(nearestBounds, { padding: [40, 40], maxZoom: 15 });
+
+        if (useCluster && clusterLayer.zoomToShowLayer) {
+            clusterLayer.zoomToShowLayer(nearestData.marker, () => {
+                nearestData.marker.openPopup();
+            });
+        } else {
+            nearestData.marker.openPopup();
+        }
+        highlightListItem(nearestData.storeEl);
     } else if (storesToRender.length > 1) {
-        map.fitBounds(bounds);
+        map.fitBounds(bounds, { padding: [30, 30] });
     } else if (storesToRender.length === 1) {
-        map.setCenter(bounds.getCenter());
-        map.setZoom(14);
+        map.setView(bounds.getCenter(), 14);
     }
 }
 
-// 5. Відкриття InfoWindow та підсвітка елемента списку
-function openStoreInfo(marker, content, listItem) {
-    infoWindow.setContent(content);
-    infoWindow.open(map, marker);
-
+// 6. Підсвітка активного елемента списку
+function highlightListItem(listItem) {
     document.querySelectorAll('.pt-store-item').forEach(el => el.classList.remove('active'));
     if (listItem) {
         listItem.classList.add('active');
@@ -232,17 +344,18 @@ function openStoreInfo(marker, content, listItem) {
     }
 }
 
-// 6. Очищення маркерів та кластерів
+// 7. Очищення маркерів та кластерів
 function clearMarkers() {
     if (markerCluster) {
-        markerCluster.clearMarkers();
+        if (typeof markerCluster.clearLayers === 'function') {
+            markerCluster.clearLayers();
+        }
+        map.removeLayer(markerCluster);
         markerCluster = null;
     }
-    markers.forEach(marker => marker.setMap(null));
-    markers = [];
 }
 
-// 7. Формула Гаверсинуса для розрахунку відстані (км)
+// 8. Формула Гаверсинуса для розрахунку відстані (км)
 function calculateDistance(lat1, lng1, lat2, lng2) {
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -255,7 +368,7 @@ function calculateDistance(lat1, lng1, lat2, lng2) {
     return R * c;
 }
 
-// 8. Об'єднана кнопка: "Моє місцезнаходження" (Топ-10) / "Скинути"
+// 9. Об'єднана кнопка: "Моє місцезнаходження" (Топ-10) / "Скинути"
 geoBtn.addEventListener('click', () => {
     if (isGeoActive) {
         resetLocationAndFilters();
@@ -277,21 +390,15 @@ geoBtn.addEventListener('click', () => {
                 cityInput.value = '';
                 autocompleteList.style.display = 'none';
 
-                if (userMarker) userMarker.setMap(null);
+                if (userMarker) {
+                    map.removeLayer(userMarker);
+                }
 
-                userMarker = new google.maps.Marker({
-                    position: userCoords,
-                    map: map,
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 8,
-                        fillColor: "#4285F4",
-                        fillOpacity: 1,
-                        strokeColor: "white",
-                        strokeWeight: 2,
-                    },
-                    title: "Ви знаходитеся тут"
-                });
+                userMarker = L.marker([userCoords.lat, userCoords.lng], {
+                    icon: userLocationIcon,
+                    title: 'Ви знаходитеся тут',
+                    zIndexOffset: 1000
+                }).addTo(map);
 
                 applyFilters(true);
 
@@ -317,17 +424,18 @@ function resetLocationAndFilters() {
     autocompleteList.style.display = 'none';
 
     if (userMarker) {
-        userMarker.setMap(null);
+        map.removeLayer(userMarker);
         userMarker = null;
     }
-    if (infoWindow) infoWindow.close();
+    if (map) {
+        map.closePopup();
+    }
 
     geoBtn.innerHTML = defaultBtnContent;
     geoBtn.classList.remove('pt-btn-secondary');
 
     applyFilters(false);
-    map.setCenter(defaultCenter);
-    map.setZoom(defaultZoom);
+    map.setView(defaultCenter, defaultZoom);
 }
 
 function handleLocationError(browserHasGeolocation) {
@@ -335,16 +443,16 @@ function handleLocationError(browserHasGeolocation) {
     geoBtn.classList.remove('pt-btn-secondary');
     geoBtn.disabled = false;
     alert(browserHasGeolocation
-        ? "Помилка: Доступ до геолокації відхилено. Дозвольте доступ у налаштуваннях браузера."
-        : "Помилка: Ваш браузер не підтримує геолокацію.");
+        ? 'Помилка: Доступ до геолокації відхилено. Дозвольте доступ у налаштуваннях браузера.'
+        : 'Помилка: Ваш браузер не підтримує геолокацію.');
 }
 
-// 9. Пошук за назвою магазину
+// 10. Пошук за назвою магазину
 nameInput.addEventListener('input', () => {
     applyFilters(false);
 });
 
-// 10. Випадаючий список міст при кліку та введенні
+// 11. Випадаючий список міст при кліку та введенні
 function showCityDropdown(filterText = '') {
     const val = filterText.trim().toLowerCase();
     autocompleteList.innerHTML = '';
@@ -386,3 +494,6 @@ document.addEventListener('click', (e) => {
         autocompleteList.style.display = 'none';
     }
 });
+
+// Запуск після завантаження DOM
+document.addEventListener('DOMContentLoaded', initMap);
