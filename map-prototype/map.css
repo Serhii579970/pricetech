@@ -387,6 +387,45 @@ button { cursor: pointer; }
 .map-count { color: var(--muted); font-size: 11px; white-space: nowrap; }
 .map-count strong { color: var(--green); font-size: 15px; }
 
+/* Кнопка відкриття планувальника маршруту */
+.planner-toggle-button {
+    height: 34px;
+    padding: 0 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: var(--panel-light);
+    color: #d6e1ee;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: .2s;
+}
+.planner-toggle-button:hover,
+.planner-toggle-button.active {
+    border-color: rgba(25,233,155,.5);
+    background: rgba(25,233,155,.14);
+    color: var(--green);
+}
+.pt-planner-badge {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--green);
+    color: #06150f;
+    font-size: 10px;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+.pt-planner-badge[hidden] { display: none; }
+
 .fullscreen-button {
     width: 34px;
     height: 34px;
@@ -422,6 +461,43 @@ button { cursor: pointer; }
     width: 100%;
     height: 100%;
     z-index: 1;
+}
+.map-placeholder.is-picking-start #map {
+    cursor: crosshair;
+}
+
+/* Підказка вибору точки старту на карті */
+.pt-map-pick-hint {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1005;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: rgba(11, 25, 45, 0.96);
+    border: 1px solid rgba(56, 189, 248, 0.55);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    font-size: 12px;
+    color: #e6f1ff;
+    white-space: nowrap;
+}
+.pt-map-pick-hint[hidden] { display: none; }
+.pt-map-pick-hint button {
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.08);
+    color: var(--white);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+}
+.pt-map-pick-hint button:hover {
+    background: rgba(239,77,72,.25);
+    border-color: rgba(239,77,72,.5);
 }
 
 /* Маркери локацій магазинів у стилі іконок .store-logo */
@@ -511,6 +587,41 @@ button { cursor: pointer; }
     border-top-color: var(--green);
 }
 
+/* Нумеровані маркери зупинок маршруту та кастомний старт */
+.pt-waypoint-marker,
+.pt-custom-start-marker {
+    background: transparent;
+    border: 0;
+}
+.pt-waypoint-badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--green);
+    color: #06150f;
+    border: 2.5px solid #0b192d;
+    font-size: 12px;
+    font-weight: 900;
+    box-shadow: 0 2px 8px rgba(5, 13, 28, 0.65), 0 0 0 2px rgba(25, 233, 155, 0.35);
+}
+.pt-custom-start-pin {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f59e0b;
+    color: #0b192d;
+    border: 2.5px solid #ffffff;
+    font-size: 12px;
+    font-weight: 900;
+    box-shadow: 0 2px 10px rgba(5, 13, 28, 0.65), 0 0 0 5px rgba(245, 158, 11, 0.28);
+}
+
 /* Кластер магазинів у тому ж стилі круглої іконки */
 .pt-cluster-icon {
     background: transparent;
@@ -570,7 +681,7 @@ button { cursor: pointer; }
 }
 
 .pt-infowindow {
-    min-width: 215px;
+    min-width: 220px;
 }
 .pt-infowindow h4 {
     margin: 0 0 5px;
@@ -613,30 +724,59 @@ button { cursor: pointer; }
     border-color: var(--green);
     color: #06150f;
 }
+.pt-popup-plan-btn {
+    width: 100%;
+    margin-top: 7px;
+    padding: 7px 10px;
+    border: 1px solid rgba(25, 233, 155, 0.35);
+    border-radius: 8px;
+    background: rgba(25, 233, 155, 0.1);
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 700;
+    transition: .15s;
+}
+.pt-popup-plan-btn:hover {
+    background: rgba(25, 233, 155, 0.2);
+}
+.pt-popup-plan-btn.in-plan {
+    background: rgba(25, 233, 155, 0.22);
+    border-color: var(--green);
+    color: #b7ffe4;
+}
 
-/* Плаваюча панель маршруту на карті */
+/* Плаваюча панель планувальника маршруту на карті */
 .pt-route-panel {
     position: absolute;
     top: 12px;
     right: 12px;
-    width: 290px;
+    width: 325px;
     max-width: calc(100% - 24px);
+    max-height: calc(100% - 24px);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
     background: rgba(11, 25, 45, 0.96);
     border: 1px solid rgba(25, 233, 155, 0.32);
     border-radius: 12px;
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
     padding: 12px 14px;
     z-index: 1000;
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(8px);
+    overflow-y: auto;
 }
 .pt-route-panel[hidden] { display: none; }
+.pt-route-panel::-webkit-scrollbar { width: 5px; }
+.pt-route-panel::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.16);
+    border-radius: 6px;
+}
 
 .pt-route-panel-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
-    margin-bottom: 10px;
 }
 .pt-route-destination {
     display: flex;
@@ -679,14 +819,13 @@ button { cursor: pointer; }
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
-    margin-bottom: 10px;
 }
 .pt-route-mode-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 8px 10px;
+    padding: 7px 10px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--panel-light);
@@ -707,6 +846,199 @@ button { cursor: pointer; }
     color: #06150f;
 }
 
+/* Секції планувальника */
+.pt-planner-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.pt-planner-label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.pt-planner-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #b4c6dc;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.pt-planner-mini-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.pt-planner-link-btn {
+    border: 0;
+    background: transparent;
+    color: var(--green);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 0;
+    transition: opacity .15s, color .15s;
+}
+.pt-planner-link-btn:hover:not(:disabled) { color: #8affcd; }
+.pt-planner-link-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.pt-planner-link-btn.pt-danger-link { color: #ff9c99; }
+.pt-planner-link-btn.pt-danger-link:hover:not(:disabled) { color: #ffc1bf; }
+
+.pt-start-mode-group {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+}
+.pt-start-mode-btn {
+    padding: 6px 6px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel-light);
+    color: #c7d4e5;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: .15s;
+}
+.pt-start-mode-btn:hover { background: #162c4a; }
+.pt-start-mode-btn.active {
+    background: rgba(56, 189, 248, 0.18);
+    border-color: rgba(56, 189, 248, 0.55);
+    color: #7dd3fc;
+}
+.pt-start-status {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.35;
+}
+
+/* Список зупинок маршруту */
+.pt-route-stops-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 175px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+.pt-route-stops-list::-webkit-scrollbar { width: 5px; }
+.pt-route-stops-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.15);
+    border-radius: 6px;
+}
+.pt-route-stops-empty {
+    font-size: 11px;
+    color: var(--muted);
+    background: rgba(16, 33, 57, 0.7);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 10px;
+    line-height: 1.45;
+}
+.pt-route-stops-empty strong { color: var(--green); }
+
+.pt-route-stop-item {
+    display: grid;
+    grid-template-columns: 22px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    background: var(--panel-light);
+    border: 1px solid var(--border);
+}
+.pt-route-stop-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--green);
+    color: #06150f;
+    font-size: 11px;
+    font-weight: 900;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.pt-route-stop-info {
+    min-width: 0;
+}
+.pt-route-stop-info strong {
+    display: block;
+    font-size: 12px;
+    color: var(--white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pt-route-stop-info small {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+}
+.pt-route-stop-leg {
+    display: inline-block;
+    margin-top: 3px;
+    font-size: 10px;
+    color: #7dd3fc;
+    font-weight: 700;
+}
+.pt-route-stop-controls {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+.pt-stop-ctrl-btn {
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: rgba(255,255,255,.04);
+    color: #c5d3e3;
+    font-size: 12px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: .15s;
+}
+.pt-stop-ctrl-btn:hover:not(:disabled) {
+    border-color: rgba(25,233,155,.45);
+    color: var(--green);
+}
+.pt-stop-ctrl-btn.pt-stop-remove:hover {
+    border-color: rgba(239,77,72,.5);
+    color: #ff9c99;
+    background: rgba(239,77,72,.16);
+}
+.pt-stop-ctrl-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+/* Перемикач кільцевого маршруту */
+.pt-roundtrip-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #cbd7e6;
+    cursor: pointer;
+    user-select: none;
+}
+.pt-roundtrip-toggle input {
+    accent-color: var(--green);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+}
+
 .pt-route-summary {
     font-size: 12px;
     color: #dce6f2;
@@ -723,12 +1055,61 @@ button { cursor: pointer; }
     gap: 10px;
     font-weight: 700;
 }
+.pt-route-submeta {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #93c5fd;
+}
 .pt-route-note {
     margin-top: 4px;
     font-size: 10px;
     color: var(--muted);
 }
 .pt-route-error { color: #ff8e8b; }
+
+.pt-planner-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.pt-planner-primary-btn,
+.pt-planner-secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: .15s;
+}
+.pt-planner-primary-btn {
+    border: 1px solid var(--green);
+    background: var(--green);
+    color: #06150f;
+}
+.pt-planner-primary-btn:hover:not(:disabled) {
+    background: var(--green-dark);
+    border-color: var(--green-dark);
+}
+.pt-planner-primary-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+.pt-planner-secondary-btn {
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    background: rgba(56, 189, 248, 0.1);
+    color: #7dd3fc;
+}
+.pt-planner-secondary-btn:hover:not(.is-disabled) {
+    background: rgba(56, 189, 248, 0.2);
+}
+.pt-planner-secondary-btn.is-disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
 
 /* Список магазинів */
 .stores-panel {
@@ -795,12 +1176,37 @@ button { cursor: pointer; }
     border-radius: 5px;
     text-transform: uppercase;
 }
+.store-card-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 7px;
+}
 .route-button {
-    display: inline-block; margin-top: 7px; padding: 0;
+    display: inline-block; padding: 0;
     border: 0; background: transparent; color: var(--green);
     font-size: 11px; font-weight: bold;
 }
 .route-button:hover { color: #8affcd; }
+.plan-add-button {
+    padding: 3px 8px;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.1);
+    color: #7dd3fc;
+    font-size: 11px;
+    font-weight: 700;
+    transition: .15s;
+}
+.plan-add-button:hover {
+    background: rgba(56, 189, 248, 0.2);
+}
+.plan-add-button.in-plan {
+    border-color: rgba(25, 233, 155, 0.5);
+    background: rgba(25, 233, 155, 0.16);
+    color: var(--green);
+}
 
 .load-more-button {
     width: 100%;
@@ -875,14 +1281,21 @@ button { cursor: pointer; }
     .main-content { padding: 14px; }
     .map-search-row { flex-direction: column; }
     .location-button { min-height: 44px; }
-    .map-placeholder { height: 380px; }
+    .map-placeholder { height: 420px; }
     .map-card, .stores-panel { padding: 12px; }
+    .map-card-top { flex-wrap: wrap; }
     .pt-route-panel {
         top: auto;
-        bottom: 12px;
-        left: 12px;
-        right: 12px;
+        bottom: 10px;
+        left: 10px;
+        right: 10px;
         width: auto;
+        max-height: 68%;
+    }
+    .pt-map-pick-hint {
+        white-space: normal;
+        max-width: calc(100% - 20px);
+        text-align: center;
     }
     .pt-fs-map-controls {
         top: 10px;

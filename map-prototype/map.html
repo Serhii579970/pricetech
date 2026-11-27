@@ -60,7 +60,7 @@
             <div>
                 <span class="eyebrow">STORE LOCATOR</span>
                 <h1>Карта магазинів</h1>
-                <p>Знаходь найближчі магазини та прокладай маршрут авто або пішки</p>
+                <p>Знаходь найближчі магазини, плануй маршрут із кількома зупинками та оптимізуй шлях авто або пішки</p>
             </div>
         </section>
 
@@ -91,6 +91,15 @@
                         </div>
                         <div class="map-card-actions">
                             <span class="map-count"><strong id="visible-count">0</strong> <span id="visible-count-label">магазинів</span></span>
+                            <button id="togglePlannerBtn" class="planner-toggle-button" type="button" title="Планувальник маршруту" aria-expanded="false" aria-controls="routePanel">
+                                <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="6" cy="19" r="3"></circle>
+                                    <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"></path>
+                                    <circle cx="18" cy="5" r="3"></circle>
+                                </svg>
+                                <span>Маршрут</span>
+                                <span id="plannerCountBadge" class="pt-planner-badge" hidden>0</span>
+                            </button>
                             <button id="fullscreenBtn" class="fullscreen-button" type="button" title="На весь екран" aria-label="На весь екран">
                                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
@@ -101,6 +110,12 @@
 
                     <div class="map-placeholder" id="mapContainer" aria-label="Інтерактивна карта магазинів">
                         <div id="map"></div>
+
+                        <!-- Підказка режиму вибору точки старту на карті -->
+                        <div id="mapPickHint" class="pt-map-pick-hint" hidden>
+                            <span>Натисніть на карту, щоб вказати точку старту</span>
+                            <button type="button" id="cancelMapPickBtn" aria-label="Скасувати вибір точки">Скасувати</button>
+                        </div>
 
                         <!-- Панель керування картою -->
                         <div id="fsMapControls" class="pt-fs-map-controls" role="toolbar" aria-label="Керування картою">
@@ -144,24 +159,24 @@
                             </div>
                         </div>
 
-                        <!-- Панель активного маршруту -->
+                        <!-- Панель планувальника маршруту -->
                         <div id="routePanel" class="pt-route-panel" hidden>
                             <div class="pt-route-panel-header">
                                 <div class="pt-route-destination">
-                                    <strong id="routeStoreName"></strong>
-                                    <span id="routeStoreAddress"></span>
+                                    <strong id="routeStoreName">Планувальник маршруту</strong>
+                                    <span id="routeStoreAddress">Додайте магазини зі списку або карти</span>
                                 </div>
-                                <button type="button" id="closeRouteBtn" class="pt-route-close" title="Закрити маршрут" aria-label="Закрити маршрут">&times;</button>
+                                <button type="button" id="closeRouteBtn" class="pt-route-close" title="Згорнути панель маршруту" aria-label="Згорнути панель маршруту">&times;</button>
                             </div>
 
                             <div class="pt-route-modes" role="group" aria-label="Спосіб пересування">
-                                <button type="button" class="pt-route-mode-btn" data-mode="car">
+                                <button type="button" class="pt-route-mode-btn active" data-mode="car" aria-pressed="true">
                                     <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
                                         <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"></path>
                                     </svg>
                                     Авто
                                 </button>
-                                <button type="button" class="pt-route-mode-btn" data-mode="foot">
+                                <button type="button" class="pt-route-mode-btn" data-mode="foot" aria-pressed="false">
                                     <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
                                         <path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"></path>
                                     </svg>
@@ -169,7 +184,50 @@
                                 </button>
                             </div>
 
-                            <div id="routeSummary" class="pt-route-summary"></div>
+                            <!-- Точка старту -->
+                            <div class="pt-planner-section">
+                                <div class="pt-planner-label-row">
+                                    <span class="pt-planner-label">Точка старту</span>
+                                    <button type="button" id="pickStartOnMapBtn" class="pt-planner-link-btn" hidden>Змінити на карті</button>
+                                </div>
+                                <div class="pt-start-mode-group" role="group" aria-label="Точка старту маршруту">
+                                    <button type="button" class="pt-start-mode-btn active" data-start-mode="gps" aria-pressed="true">Моє місце</button>
+                                    <button type="button" class="pt-start-mode-btn" data-start-mode="custom" aria-pressed="false">На карті</button>
+                                    <button type="button" class="pt-start-mode-btn" data-start-mode="first-store" aria-pressed="false">1-й магазин</button>
+                                </div>
+                                <div id="startPointStatus" class="pt-start-status">Використовується ваша геолокація</div>
+                            </div>
+
+                            <!-- Список зупинок -->
+                            <div class="pt-planner-section">
+                                <div class="pt-planner-label-row">
+                                    <span class="pt-planner-label">Зупинки (<span id="routeStopsCount">0</span>)</span>
+                                    <div class="pt-planner-mini-actions">
+                                        <button type="button" id="optimizeRouteBtn" class="pt-planner-link-btn" title="Оптимізувати порядок зупинок для найкоротшого шляху" disabled>Оптимізувати</button>
+                                        <button type="button" id="clearRouteStopsBtn" class="pt-planner-link-btn pt-danger-link" disabled>Очистити</button>
+                                    </div>
+                                </div>
+
+                                <ol id="routeStopsList" class="pt-route-stops-list"></ol>
+                                <div id="routeStopsEmpty" class="pt-route-stops-empty">
+                                    Натисніть <strong>«+ У маршрут»</strong> на картці магазину або в описі на карті, щоб додати зупинки.
+                                </div>
+                            </div>
+
+                            <!-- Опція кільцевого маршруту -->
+                            <label class="pt-roundtrip-toggle" for="roundTripCheckbox">
+                                <input type="checkbox" id="roundTripCheckbox">
+                                <span>Повернутися до точки старту</span>
+                            </label>
+
+                            <!-- Підсумок маршруту -->
+                            <div id="routeSummary" class="pt-route-summary">Додайте хоча б 1 магазин для побудови маршруту.</div>
+
+                            <!-- Дії -->
+                            <div class="pt-planner-footer">
+                                <button type="button" id="buildPlannedRouteBtn" class="pt-planner-primary-btn" disabled>Побудувати</button>
+                                <a id="openGoogleMapsBtn" class="pt-planner-secondary-btn is-disabled" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true">Google Maps ↗</a>
+                            </div>
                         </div>
                     </div>
                 </div>
