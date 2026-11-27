@@ -2,6 +2,8 @@
 :root {
     --pt-primary: #0056b3;
     --pt-primary-hover: #004494;
+    --pt-walk: #16a34a;
+    --pt-walk-hover: #15803d;
     --pt-bg: #f8f9fa;
     --pt-text: #333333;
     --pt-border: #e0e0e0;
@@ -300,6 +302,10 @@ body {
 }
 
 /* InfoWindow */
+.pt-infowindow {
+    min-width: 210px;
+}
+
 .pt-infowindow h4 {
     margin: 0 0 5px 0;
     color: var(--pt-primary);
@@ -310,11 +316,173 @@ body {
     font-size: 13px;
 }
 
-.pt-infowindow a {
-    color: #0056b3;
-    text-decoration: none;
-    font-weight: bold;
+.pt-popup-route-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.pt-popup-route-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border: 1px solid var(--pt-border);
+    border-radius: 6px;
+    background: #f8fafc;
+    color: var(--pt-text);
     font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.pt-popup-route-btn[data-route-mode="car"]:hover {
+    background: var(--pt-primary);
+    border-color: var(--pt-primary);
+    color: var(--pt-white);
+}
+
+.pt-popup-route-btn[data-route-mode="foot"]:hover {
+    background: var(--pt-walk);
+    border-color: var(--pt-walk);
+    color: var(--pt-white);
+}
+
+/* Панель маршруту на карті */
+.pt-route-panel {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 290px;
+    max-width: calc(100% - 24px);
+    background: var(--pt-white);
+    border: 1px solid var(--pt-border);
+    border-radius: var(--pt-radius);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+    padding: 12px 14px;
+    z-index: 1000;
+}
+
+.pt-route-panel[hidden] {
+    display: none;
+}
+
+.pt-route-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.pt-route-destination {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.pt-route-destination strong {
+    font-size: 14px;
+    color: var(--pt-primary);
+    line-height: 1.3;
+}
+
+.pt-route-destination span {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.3;
+}
+
+.pt-route-close {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+}
+
+.pt-route-close:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.pt-route-modes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.pt-route-mode-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border: 1px solid var(--pt-border);
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.pt-route-mode-btn:hover {
+    background: #eef2f6;
+}
+
+.pt-route-mode-btn.active[data-mode="car"] {
+    background: var(--pt-primary);
+    border-color: var(--pt-primary);
+    color: var(--pt-white);
+}
+
+.pt-route-mode-btn.active[data-mode="foot"] {
+    background: var(--pt-walk);
+    border-color: var(--pt-walk);
+    color: var(--pt-white);
+}
+
+.pt-route-summary {
+    font-size: 13px;
+    color: #334155;
+    background: #f8fafc;
+    border-radius: 6px;
+    padding: 8px 10px;
+    line-height: 1.4;
+}
+
+.pt-route-metrics {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-weight: 600;
+}
+
+.pt-route-note {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.pt-route-error {
+    color: #b91c1c;
 }
 
 /* Адаптивність для мобільних */
@@ -356,5 +524,13 @@ body {
     .pt-controls {
         flex-direction: column;
         align-items: stretch;
+    }
+
+    .pt-route-panel {
+        top: auto;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        width: auto;
     }
 }
