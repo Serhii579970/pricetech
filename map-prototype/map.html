@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта магазинів | PriceTech</title>
+
+    <!-- Стилі Leaflet та MarkerCluster -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+
+    <!-- Власні стилі PriceTech -->
+    <link rel="stylesheet" href="map.css">
+    <link rel="stylesheet" href="avatar.css">
+</head>
+<body>
+<div class="app-layout">
+    <aside class="sidebar">
+        <a href="index.html" class="sidebar-logo">
+            <img src="assets/logo.png" alt="PriceTech">
+        </a>
+
+        <nav class="sidebar-nav">
+            <a href="index.html" class="sidebar-link"><span>⌂</span> Головна</a>
+            <a href="search.html" class="sidebar-link"><span>⌕</span> Пошук</a>
+            <a href="map.html" class="sidebar-link active"><span>▧</span> Карта магазинів</a>
+            <a href="shopping-list.html" class="sidebar-link"><span>🛒</span> Список покупок</a>
+            <a href="calories.html" class="sidebar-link"><span>◉</span> Калорії</a>
+            <a href="analytics.html" class="sidebar-link"><span>▥</span> Аналітика цін</a>
+            <a href="notifications.html" class="sidebar-link"><span>♧</span> Сповіщення</a>
+            <a href="profile.html" class="sidebar-link"><span>♙</span> Профіль</a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <p>PriceTech © 2026</p>
+            <p>Розумні покупки — ближче</p>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="topbar">
+            <div class="top-search">
+                <span>⌕</span>
+                <input type="text" id="top-search" placeholder="Я шукаю...">
+            </div>
+            <div class="location">
+                <span>📍</span>
+                <div>
+                    <small>Ваше місце</small>
+                    <p id="topbar-location-text">Місцезнаходження не підключено</p>
+                </div>
+            </div>
+            <div class="top-actions">
+                <a class="icon-button" href="notifications.html" aria-label="Сповіщення">♧</a>
+            </div>
+        </header>
+
+        <section class="page-heading">
+            <div>
+                <span class="eyebrow">STORE LOCATOR</span>
+                <h1>Карта магазинів</h1>
+                <p>Знаходь найближчі магазини та прокладай маршрут авто або пішки</p>
+            </div>
+        </section>
+
+        <div class="map-locator-shell" id="pricetechLocator">
+            <section class="map-search-row">
+                <div class="city-search-wrapper">
+                    <input id="citySearch" type="search" placeholder="Оберіть або введіть місто..." autocomplete="off">
+                    <ul id="autocompleteList" class="pt-autocomplete-list"></ul>
+                </div>
+
+                <label class="map-search" for="nameSearch">
+                    <span>⌕</span>
+                    <input id="nameSearch" type="search" placeholder="Пошук магазину або адреси..." autocomplete="off">
+                    <button type="button" id="clear-search" title="Очистити пошук" aria-label="Очистити пошук">&times;</button>
+                </label>
+
+                <button class="location-button" id="geoBtn" type="button">
+                    <span>◎</span> Моє місце
+                </button>
+            </section>
+
+            <section class="map-workspace">
+                <div class="map-card">
+                    <div class="map-card-top">
+                        <div>
+                            <h2>Магазини поруч</h2>
+                            <p id="map-subtitle">Інтерактивна карта OpenStreetMap</p>
+                        </div>
+                        <div class="map-card-actions">
+                            <span class="map-count"><strong id="visible-count">0</strong> <span id="visible-count-label">магазинів</span></span>
+                            <button id="fullscreenBtn" class="fullscreen-button" type="button" title="На весь екран" aria-label="На весь екран">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="map-placeholder" id="mapContainer" aria-label="Інтерактивна карта магазинів">
+                        <div id="map"></div>
+
+                        <!-- Панель керування картою -->
+                        <div id="fsMapControls" class="pt-fs-map-controls" role="toolbar" aria-label="Керування картою">
+                            <div class="pt-fs-control-group">
+                                <button type="button" id="fsZoomInBtn" class="pt-fs-ctrl-btn" title="Наблизити (+)" aria-label="Наблизити карту">
+                                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </button>
+                                <span id="fsZoomLevel" class="pt-fs-zoom-badge" title="Поточний масштаб">6</span>
+                                <button type="button" id="fsZoomOutBtn" class="pt-fs-ctrl-btn" title="Віддалити (−)" aria-label="Віддалити карту">
+                                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="pt-fs-control-group pt-fs-only-group">
+                                <button type="button" id="fsLocateBtn" class="pt-fs-ctrl-btn" title="Моє місцезнаходження" aria-label="Центрувати на моєму місцезнаходженні">
+                                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="12" cy="12" r="4"></circle>
+                                        <line x1="12" y1="2" x2="12" y2="5"></line>
+                                        <line x1="12" y1="19" x2="12" y2="22"></line>
+                                        <line x1="2" y1="12" x2="5" y2="12"></line>
+                                        <line x1="19" y1="12" x2="22" y2="12"></line>
+                                    </svg>
+                                </button>
+                                <button type="button" id="fsResetViewBtn" class="pt-fs-ctrl-btn" title="Показати всі магазини / Скинути масштаб" aria-label="Показати всі магазини на карті">
+                                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path>
+                                        <path d="M3 3v5h5"></path>
+                                    </svg>
+                                </button>
+                                <button type="button" id="fsToggleListBtn" class="pt-fs-ctrl-btn active" title="Сховати список магазинів" aria-label="Показати або сховати список магазинів" aria-pressed="true">
+                                    <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                                        <line x1="15" y1="4" x2="15" y2="20"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Панель активного маршруту -->
+                        <div id="routePanel" class="pt-route-panel" hidden>
+                            <div class="pt-route-panel-header">
+                                <div class="pt-route-destination">
+                                    <strong id="routeStoreName"></strong>
+                                    <span id="routeStoreAddress"></span>
+                                </div>
+                                <button type="button" id="closeRouteBtn" class="pt-route-close" title="Закрити маршрут" aria-label="Закрити маршрут">&times;</button>
+                            </div>
+
+                            <div class="pt-route-modes" role="group" aria-label="Спосіб пересування">
+                                <button type="button" class="pt-route-mode-btn" data-mode="car">
+                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+                                        <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"></path>
+                                    </svg>
+                                    Авто
+                                </button>
+                                <button type="button" class="pt-route-mode-btn" data-mode="foot">
+                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+                                        <path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 23h2.1l1.8-8 2.1 2v6h2v-7.5l-2.1-2 .6-3C14.8 12 16.8 13 19 13v-2c-1.9 0-3.5-1-4.3-2.4l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.5.1-.8.1L6 8.3V13h2V9.6l1.8-.7"></path>
+                                    </svg>
+                                    Пішки
+                                </button>
+                            </div>
+
+                            <div id="routeSummary" class="pt-route-summary"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside class="stores-panel">
+                    <div class="stores-heading">
+                        <div>
+                            <h2 id="stores-panel-title">Усі магазини</h2>
+                            <p id="stores-panel-subtitle">Оберіть магазин для перегляду або маршруту</p>
+                        </div>
+                        <button type="button" id="sort-distance" class="sort-button">За відстанню ↕</button>
+                    </div>
+
+                    <div class="store-list" id="storesList"></div>
+                    <div class="no-stores" id="no-stores" hidden>Магазинів не знайдено. Спробуйте інший запит.</div>
+
+                    <div class="selected-store-info" id="selected-store-info">
+                        <span class="info-icon">⌖</span>
+                        <div>
+                            <strong id="selected-store-title">Оберіть магазин</strong>
+                            <small id="selected-store-desc">Натисніть на магазин у списку або на карті, щоб прокласти маршрут.</small>
+                        </div>
+                    </div>
+                </aside>
+            </section>
+
+            <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        </div>
+
+        <footer class="page-footer">PriceTech © 2026. Розумні покупки — ближче.</footer>
+    </main>
+</div>
+
+<!-- 1. Бази даних магазинів та міст -->
+<script src="storesDB.js"></script>
+<script src="citiesDB.js"></script>
+
+<!-- 2. Бібліотека Leaflet та MarkerCluster -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+
+<!-- 3. Логіка карти та аватар -->
+<script src="app.js"></script>
+<script type="module" src="avatar.js"></script>
+</body>
+</html>

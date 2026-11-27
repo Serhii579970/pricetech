@@ -1,0 +1,899 @@
+/* PriceTech — сторінка карти магазинів */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --bg: #050d1c;
+    --panel: #0b192d;
+    --panel-light: #102139;
+    --green: #19e99b;
+    --green-dark: #08c987;
+    --blue: #38bdf8;
+    --white: #fff;
+    --muted: #91a2b9;
+    --border: rgba(255,255,255,.09);
+}
+
+body {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--white);
+    font-family: Arial, sans-serif;
+}
+body.pt-fullscreen-lock { overflow: hidden; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+
+.app-layout {
+    display: grid;
+    grid-template-columns: 225px minmax(0, 1fr);
+    min-height: 100vh;
+}
+
+/* Бічне меню — стилістично таке саме, як у search.css */
+.sidebar {
+    background: #081426;
+    border-right: 1px solid var(--border);
+    padding: 22px 15px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.sidebar-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 35px;
+}
+.sidebar-logo img {
+    width: 150px;
+    height: 65px;
+    object-fit: contain;
+}
+.sidebar-nav { display: flex; flex-direction: column; gap: 9px; }
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #b4c1d2;
+    font-size: 14px;
+    transition: .2s;
+}
+.sidebar-link span { font-size: 19px; width: 23px; text-align: center; }
+.sidebar-link:hover { background: rgba(25,233,155,.08); color: var(--green); }
+.sidebar-link.active { background: var(--green); color: #06150f; font-weight: bold; }
+.sidebar-bottom {
+    margin-top: auto;
+    padding: 20px 5px 0;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.8;
+}
+
+/* Основна область та верхня панель */
+.main-content { min-width: 0; padding: 20px 25px; }
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 32px;
+}
+.top-search {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--panel-light);
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    padding: 11px 17px;
+    width: min(380px, 45%);
+}
+.top-search span { color: var(--green); font-size: 22px; }
+.top-search input {
+    width: 100%;
+    background: none;
+    border: none;
+    outline: none;
+    color: white;
+}
+.top-search input::placeholder { color: var(--muted); }
+.location { display: flex; align-items: center; gap: 10px; }
+.location small { color: var(--muted); font-size: 11px; }
+.location p { font-size: 12px; margin-top: 4px; }
+.top-actions { display: flex; align-items: center; gap: 17px; }
+.icon-button { background: transparent; border: none; color: white; font-size: 23px; text-decoration: none; }
+.avatar {
+    width: 37px; height: 37px; border-radius: 50%;
+    background: linear-gradient(135deg, #1ceca0, #087a9c);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold;
+}
+
+/* Заголовок сторінки */
+.page-heading {
+    display: flex; align-items: end; justify-content: space-between;
+    gap: 15px; margin-bottom: 22px;
+}
+.eyebrow { color: var(--green); font-size: 10px; letter-spacing: 2px; }
+.page-heading h1 { font-size: 29px; margin: 8px 0; }
+.page-heading p { color: var(--muted); font-size: 13px; }
+
+/* Оболонка локатора (пошук + карта + список + сповіщення) */
+.map-locator-shell {
+    position: relative;
+}
+
+/* Пошук */
+.map-search-row { display: flex; gap: 12px; margin-bottom: 18px; align-items: stretch; }
+.city-search-wrapper {
+    position: relative;
+    width: 240px;
+    flex-shrink: 0;
+}
+.city-search-wrapper input {
+    width: 100%;
+    height: 100%;
+    padding: 13px 16px;
+    background: var(--panel-light);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--white);
+    outline: none;
+    transition: border-color .2s;
+}
+.city-search-wrapper input::placeholder { color: var(--muted); }
+.city-search-wrapper input:focus { border-color: rgba(25,233,155,.55); }
+
+.pt-autocomplete-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--panel);
+    border: 1px solid rgba(25,233,155,.25);
+    border-radius: 10px;
+    list-style: none;
+    max-height: 240px;
+    overflow-y: auto;
+    box-shadow: 0 10px 28px rgba(0,0,0,.45);
+    display: none;
+    z-index: 1200;
+}
+.pt-autocomplete-list li {
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: #d6e1ee;
+}
+.pt-autocomplete-list li:last-child { border-bottom: none; }
+.pt-autocomplete-list li:hover {
+    background: rgba(25,233,155,.12);
+    color: var(--green);
+}
+
+.map-search {
+    flex: 1; display: flex; align-items: center; gap: 12px;
+    padding: 13px 16px; background: var(--panel-light);
+    border: 1px solid var(--border); border-radius: 12px;
+}
+.map-search:focus-within { border-color: rgba(25,233,155,.55); }
+.map-search > span { color: var(--green); font-size: 21px; }
+.map-search input { flex: 1; min-width: 0; background: transparent; border: 0; outline: 0; color: white; }
+.map-search input::placeholder { color: var(--muted); }
+.map-search button { border: 0; background: transparent; color: var(--muted); font-size: 22px; line-height: 1; }
+.map-search button:hover { color: var(--white); }
+
+.location-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 18px;
+    border: 1px solid rgba(25,233,155,.35);
+    border-radius: 12px;
+    background: rgba(25,233,155,.08);
+    color: var(--green);
+    font-size: 13px;
+    font-weight: bold;
+    white-space: nowrap;
+    transition: .2s;
+}
+.location-button:hover { background: rgba(25,233,155,.16); }
+.location-button.pt-btn-secondary {
+    background: rgba(239,77,72,.14);
+    border-color: rgba(239,77,72,.45);
+    color: #ff9c99;
+}
+.location-button.pt-btn-secondary:hover { background: rgba(239,77,72,.22); }
+.location-button:disabled { opacity: .65; cursor: not-allowed; }
+
+/* Карта та список */
+.map-workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(300px, .85fr);
+    gap: 17px;
+    align-items: stretch;
+}
+
+/* Повноекранний режим оболонки локатора */
+.map-locator-shell:fullscreen,
+.map-locator-shell:-webkit-full-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100vw;
+    height: 100vh;
+    padding: 14px;
+    background: var(--bg);
+    overflow: hidden;
+}
+.map-locator-shell.is-fullscreen {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100vw;
+    height: 100vh;
+    padding: 14px;
+    background: var(--bg);
+    overflow: hidden;
+    z-index: 9999;
+}
+
+.map-locator-shell:fullscreen .map-search-row,
+.map-locator-shell:-webkit-full-screen .map-search-row,
+.map-locator-shell.is-fullscreen .map-search-row {
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.map-locator-shell:fullscreen .map-workspace,
+.map-locator-shell:-webkit-full-screen .map-workspace,
+.map-locator-shell.is-fullscreen .map-workspace {
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 14px;
+}
+
+.map-locator-shell.is-stores-collapsed .map-workspace {
+    grid-template-columns: minmax(0, 1fr);
+}
+.map-locator-shell.is-stores-collapsed .stores-panel {
+    display: none;
+}
+
+.map-locator-shell:fullscreen .map-card,
+.map-locator-shell:-webkit-full-screen .map-card,
+.map-locator-shell.is-fullscreen .map-card,
+.map-locator-shell:fullscreen .stores-panel,
+.map-locator-shell:-webkit-full-screen .stores-panel,
+.map-locator-shell.is-fullscreen .stores-panel {
+    height: 100%;
+    min-height: 0;
+}
+
+.map-locator-shell:fullscreen .map-placeholder,
+.map-locator-shell:-webkit-full-screen .map-placeholder,
+.map-locator-shell.is-fullscreen .map-placeholder {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+}
+
+.map-locator-shell:fullscreen .store-list,
+.map-locator-shell:-webkit-full-screen .store-list,
+.map-locator-shell.is-fullscreen .store-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+}
+
+/* Стандартний zoom Leaflet прихований — замість нього завжди працює панель PriceTech */
+.leaflet-control-zoom {
+    display: none;
+}
+
+/* Панель керування картою (масштаб завжди видимий, додаткові кнопки — у повноекранному режимі) */
+.pt-fs-map-controls {
+    display: flex;
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 1000;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: auto;
+}
+
+.pt-fs-control-group {
+    display: flex;
+    flex-direction: column;
+    background: rgba(11, 25, 45, 0.94);
+    border: 1px solid rgba(25, 233, 155, 0.28);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+}
+
+.pt-fs-only-group {
+    display: none;
+}
+.map-locator-shell:fullscreen .pt-fs-only-group,
+.map-locator-shell:-webkit-full-screen .pt-fs-only-group,
+.map-locator-shell.is-fullscreen .pt-fs-only-group {
+    display: flex;
+}
+
+.pt-fs-ctrl-btn {
+    width: 40px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    color: #dce6f2;
+    transition: background .15s, color .15s;
+}
+.pt-fs-ctrl-btn:last-child {
+    border-bottom: 0;
+}
+.pt-fs-ctrl-btn:hover {
+    background: rgba(25, 233, 155, 0.14);
+    color: var(--green);
+}
+.pt-fs-ctrl-btn:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: -2px;
+}
+.pt-fs-ctrl-btn.active {
+    background: rgba(25, 233, 155, 0.2);
+    color: var(--green);
+}
+
+.pt-fs-zoom-badge {
+    width: 40px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green);
+    background: rgba(16, 33, 57, 0.9);
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+}
+
+.map-card, .stores-panel {
+    min-width: 0; background: var(--panel);
+    border: 1px solid var(--border); border-radius: 15px; padding: 16px;
+}
+.map-card { display: flex; flex-direction: column; }
+.map-card-top, .stores-heading {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 14px;
+}
+.map-card-top h2, .stores-heading h2 { font-size: 15px; }
+.map-card-top p, .stores-heading p { color: var(--muted); font-size: 11px; margin-top: 4px; }
+.map-card-actions { display: flex; align-items: center; gap: 10px; }
+.map-count { color: var(--muted); font-size: 11px; white-space: nowrap; }
+.map-count strong { color: var(--green); font-size: 15px; }
+
+.fullscreen-button {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--panel-light);
+    color: #c7d4e5;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    transition: .2s;
+}
+.fullscreen-button:hover {
+    border-color: rgba(25,233,155,.45);
+    color: var(--green);
+}
+
+/* Контейнер реальної карти Leaflet */
+.map-placeholder {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 535px;
+    height: calc(100vh - 255px);
+    max-height: 720px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: #10243b;
+    isolation: isolate;
+}
+#map {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Маркери локацій магазинів у стилі іконок .store-logo */
+.pt-store-marker {
+    background: transparent;
+    border: 0;
+}
+.pt-store-pin {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 34px;
+    height: 42px;
+    filter: drop-shadow(0 3px 6px rgba(5, 13, 28, 0.55));
+    transition: transform .16s ease, filter .16s ease;
+    transform-origin: bottom center;
+}
+.pt-store-marker:hover .pt-store-pin {
+    transform: scale(1.12);
+    filter: drop-shadow(0 5px 10px rgba(5, 13, 28, 0.7));
+}
+.pt-store-pin-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 10px;
+    line-height: 1;
+    background: #ffffff;
+    color: #e53b35;
+    border: 2.5px solid #0b192d;
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.85);
+}
+.pt-store-pin-tail {
+    width: 0;
+    height: 0;
+    margin-top: -2px;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 9px solid #0b192d;
+}
+
+/* Брендові кольори точок локацій (синхронно з .store-logo) */
+.pt-store-pin-badge.logo-atb {
+    background: #ffffff;
+    color: #1261c8;
+    font-size: 9.5px;
+    letter-spacing: -0.3px;
+}
+.pt-store-pin-badge.logo-silpo {
+    background: #ffffff;
+    color: #e64b46;
+    font-size: 16px;
+}
+.pt-store-pin-badge.logo-varus {
+    background: #f58220;
+    color: #ffffff;
+    font-size: 15px;
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.45);
+}
+.pt-store-pin-badge.logo-aushan {
+    background: #ffffff;
+    color: #e23f38;
+    font-size: 16px;
+}
+.pt-store-pin-badge.logo-default {
+    background: var(--green);
+    color: #06150f;
+    font-size: 11px;
+    box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.4);
+}
+
+/* Підсвітка обраного магазину на карті */
+.pt-store-marker.is-selected .pt-store-pin {
+    transform: scale(1.16);
+    filter: drop-shadow(0 0 8px rgba(25, 233, 155, 0.7));
+}
+.pt-store-marker.is-selected .pt-store-pin-badge {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(25, 233, 155, 0.3);
+}
+.pt-store-marker.is-selected .pt-store-pin-tail {
+    border-top-color: var(--green);
+}
+
+/* Кластер магазинів у тому ж стилі круглої іконки */
+.pt-cluster-icon {
+    background: transparent;
+    border: 0;
+}
+.pt-cluster-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--green);
+    color: #06150f;
+    border: 3px solid #0b192d;
+    font-size: 13px;
+    font-weight: 900;
+    box-shadow: 0 3px 10px rgba(5, 13, 28, 0.55), inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
+    transition: transform .15s ease;
+}
+.pt-cluster-icon:hover .pt-cluster-badge {
+    transform: scale(1.08);
+}
+
+/* Точка геолокації користувача */
+.pt-user-marker {
+    background: transparent;
+    border: 0;
+}
+.pt-user-pin {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #11baff;
+    border: 2.5px solid #ffffff;
+    box-shadow: 0 0 0 6px rgba(17, 186, 255, 0.28), 0 2px 8px rgba(5, 13, 28, 0.5);
+}
+
+/* Темна стилізація Leaflet popup у стилі PriceTech */
+.leaflet-popup-content-wrapper {
+    background: var(--panel);
+    color: var(--white);
+    border: 1px solid rgba(25,233,155,.28);
+    border-radius: 12px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.45);
+}
+.leaflet-popup-tip {
+    background: var(--panel);
+    border: 1px solid rgba(25,233,155,.28);
+}
+.leaflet-container a.leaflet-popup-close-button {
+    color: var(--muted);
+    padding: 6px 8px 0 0;
+}
+.leaflet-container a.leaflet-popup-close-button:hover {
+    color: var(--white);
+}
+
+.pt-infowindow {
+    min-width: 215px;
+}
+.pt-infowindow h4 {
+    margin: 0 0 5px;
+    font-size: 14px;
+    color: var(--green);
+}
+.pt-infowindow p {
+    margin: 0 0 6px;
+    font-size: 12px;
+    color: #d6e1ee;
+    line-height: 1.4;
+}
+.pt-popup-route-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+.pt-popup-route-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel-light);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 700;
+    transition: .15s;
+}
+.pt-popup-route-btn[data-route-mode="car"]:hover {
+    background: #1765d1;
+    border-color: #38bdf8;
+    color: var(--white);
+}
+.pt-popup-route-btn[data-route-mode="foot"]:hover {
+    background: var(--green);
+    border-color: var(--green);
+    color: #06150f;
+}
+
+/* Плаваюча панель маршруту на карті */
+.pt-route-panel {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 290px;
+    max-width: calc(100% - 24px);
+    background: rgba(11, 25, 45, 0.96);
+    border: 1px solid rgba(25, 233, 155, 0.32);
+    border-radius: 12px;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+    padding: 12px 14px;
+    z-index: 1000;
+    backdrop-filter: blur(6px);
+}
+.pt-route-panel[hidden] { display: none; }
+
+.pt-route-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.pt-route-destination {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+.pt-route-destination strong {
+    font-size: 13px;
+    color: var(--green);
+    line-height: 1.3;
+}
+.pt-route-destination span {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.3;
+}
+.pt-route-close {
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    background: var(--panel-light);
+    color: #c5d3e3;
+    font-size: 17px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: .15s;
+}
+.pt-route-close:hover {
+    background: rgba(239,77,72,.2);
+    border-color: rgba(239,77,72,.45);
+    color: var(--white);
+}
+
+.pt-route-modes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.pt-route-mode-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel-light);
+    color: #d6e1ee;
+    font-size: 12px;
+    font-weight: 700;
+    transition: .15s;
+}
+.pt-route-mode-btn:hover { background: #162c4a; }
+.pt-route-mode-btn.active[data-mode="car"] {
+    background: #1765d1;
+    border-color: #38bdf8;
+    color: var(--white);
+}
+.pt-route-mode-btn.active[data-mode="foot"] {
+    background: var(--green);
+    border-color: var(--green);
+    color: #06150f;
+}
+
+.pt-route-summary {
+    font-size: 12px;
+    color: #dce6f2;
+    background: var(--panel-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 10px;
+    line-height: 1.4;
+}
+.pt-route-metrics {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-weight: 700;
+}
+.pt-route-note {
+    margin-top: 4px;
+    font-size: 10px;
+    color: var(--muted);
+}
+.pt-route-error { color: #ff8e8b; }
+
+/* Список магазинів */
+.stores-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+.stores-heading { align-items: flex-start; }
+.sort-button {
+    border: 1px solid var(--border); background: var(--panel-light);
+    color: #bdc9d8; border-radius: 8px; padding: 8px 10px; font-size: 11px; white-space: nowrap;
+    transition: .15s;
+}
+.sort-button:hover { border-color: rgba(25,233,155,.45); color: var(--green); }
+
+.store-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    max-height: calc(100vh - 360px);
+    min-height: 360px;
+    padding-right: 4px;
+    margin-bottom: 12px;
+}
+.store-list::-webkit-scrollbar { width: 6px; }
+.store-list::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.15);
+    border-radius: 6px;
+}
+
+.store-card {
+    display: grid; grid-template-columns: 48px minmax(0,1fr); gap: 11px;
+    align-items: center; padding: 12px;
+    background: #0d1e34; border: 1px solid var(--border);
+    border-radius: 12px; cursor: pointer; transition: .2s;
+}
+.store-card:hover, .store-card.selected {
+    border-color: rgba(25,233,155,.55);
+    background: #10283b;
+}
+.store-logo {
+    width: 44px; height: 44px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-weight: 900; font-size: 11px;
+    background: #fff; color: #e53b35; border: 2px solid rgba(255,255,255,.85);
+}
+.logo-atb { color: #1261c8; font-size: 12px; }
+.logo-silpo { color: #e64b46; font-size: 20px; }
+.logo-varus { background: #f58220; color: #fff; }
+.logo-aushan { color: #e23f38; font-size: 20px; }
+.logo-default { background: var(--green); color: #06150f; font-size: 14px; }
+
+.store-details { min-width: 0; }
+.store-details h3 { font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.store-details p { color: var(--muted); font-size: 11px; margin-bottom: 5px; line-height: 1.35; }
+.store-details > span { color: #75d9b0; font-size: 11px; display: block; }
+.pt-nearest-label {
+    background: rgba(25,233,155,.18);
+    color: var(--green);
+    border: 1px solid rgba(25,233,155,.4);
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 5px;
+    text-transform: uppercase;
+}
+.route-button {
+    display: inline-block; margin-top: 7px; padding: 0;
+    border: 0; background: transparent; color: var(--green);
+    font-size: 11px; font-weight: bold;
+}
+.route-button:hover { color: #8affcd; }
+
+.load-more-button {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel-light);
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 700;
+    transition: .15s;
+}
+.load-more-button:hover {
+    border-color: rgba(25,233,155,.45);
+    background: rgba(25,233,155,.1);
+}
+
+.no-stores { padding: 22px 10px; text-align: center; color: var(--muted); font-size: 12px; }
+.selected-store-info {
+    display: flex; gap: 10px; align-items: center;
+    margin-top: auto; padding: 13px 11px; border-radius: 10px;
+    background: rgba(25,233,155,.07); border: 1px solid rgba(25,233,155,.18);
+}
+.info-icon { color: var(--green); font-size: 22px; }
+.selected-store-info strong { display: block; font-size: 12px; }
+.selected-store-info small { display: block; color: var(--muted); font-size: 10px; margin-top: 4px; }
+.page-footer { padding: 24px 0 8px; color: var(--muted); font-size: 11px; text-align: center; }
+
+.toast {
+    position: fixed; right: 24px; bottom: 24px; z-index: 10010;
+    max-width: min(360px, calc(100vw - 32px));
+    padding: 13px 17px; border-radius: 10px;
+    background: #12334a; border: 1px solid rgba(25,233,155,.4);
+    color: white; font-size: 12px; opacity: 0; transform: translateY(10px);
+    pointer-events: none; transition: .2s;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* Адаптація для менших екранів */
+@media (max-width: 1100px) {
+    .app-layout { grid-template-columns: 190px minmax(0,1fr); }
+    .map-workspace { grid-template-columns: minmax(0,1.25fr) minmax(260px,.85fr); }
+    .main-content { padding: 18px; }
+}
+@media (max-width: 800px) {
+    .app-layout { grid-template-columns: 1fr; }
+    .sidebar { min-height: auto; padding: 12px; border-right: 0; border-bottom: 1px solid var(--border); }
+    .sidebar-logo { justify-content: flex-start; margin: 0 0 12px; }
+    .sidebar-logo img { width: 120px; height: 48px; }
+    .sidebar-nav { flex-direction: row; overflow-x: auto; gap: 6px; }
+    .sidebar-link { white-space: nowrap; padding: 10px; font-size: 11px; }
+    .sidebar-bottom { display: none; }
+    .topbar { flex-wrap: wrap; margin-bottom: 22px; }
+    .top-search { width: 100%; order: 3; }
+    .map-search-row { flex-wrap: wrap; }
+    .city-search-wrapper { width: 100%; }
+    .map-workspace { grid-template-columns: 1fr; }
+    .map-placeholder { height: 440px; min-height: 360px; }
+    .store-list { max-height: 360px; min-height: 200px; }
+    .page-heading { align-items: flex-start; flex-direction: column; }
+
+    .map-locator-shell:fullscreen .map-workspace,
+    .map-locator-shell:-webkit-full-screen .map-workspace,
+    .map-locator-shell.is-fullscreen .map-workspace {
+        grid-template-rows: minmax(0, 1fr) minmax(180px, 38%);
+    }
+    .map-locator-shell.is-stores-collapsed .map-workspace {
+        grid-template-rows: minmax(0, 1fr);
+    }
+}
+@media (max-width: 480px) {
+    .main-content { padding: 14px; }
+    .map-search-row { flex-direction: column; }
+    .location-button { min-height: 44px; }
+    .map-placeholder { height: 380px; }
+    .map-card, .stores-panel { padding: 12px; }
+    .pt-route-panel {
+        top: auto;
+        bottom: 12px;
+        left: 12px;
+        right: 12px;
+        width: auto;
+    }
+    .pt-fs-map-controls {
+        top: 10px;
+        left: 10px;
+        gap: 8px;
+    }
+    .pt-fs-ctrl-btn {
+        width: 36px;
+        height: 34px;
+    }
+    .pt-fs-zoom-badge {
+        width: 36px;
+    }
+}
